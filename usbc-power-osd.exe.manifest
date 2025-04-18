@@ -6,7 +6,7 @@
     name="USBMeterOSD"
     type="win32"
   />
-  <description>USB Meter On-Screen Display application</description>
+  <description>USB Meter On-Screen Display</description>
   
   <!-- Declare compatibility with Windows -->
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
