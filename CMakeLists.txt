@@ -17,7 +17,7 @@ FetchContent_Declare(
         GIT_SHALLOW ON
 )
 FetchContent_MakeAvailable(wxWidgets)
-set(EXECUTABLE_NAME "wxWindows Test Drive")
+set(EXECUTABLE_NAME "USB-C Power")
 
 set(SRCS main.cpp
         GraphPanel.cpp
@@ -32,7 +32,7 @@ else()
     # the WIN32 is needed for Windows in order for it to look for WinMain
     # instead of the main function. This is ignored on other systems,
     # so it works on all platforms
-    add_executable(main WIN32 ${SRCS} main.exe.manifest)
+    add_executable(main WIN32 ${SRCS} usbc-power-osd.exe.manifest)
 endif()
 
 target_link_libraries(main PRIVATE wxcore wxnet)
