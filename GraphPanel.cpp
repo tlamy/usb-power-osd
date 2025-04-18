@@ -9,12 +9,10 @@
 // Custom panel for drawing a graph
 GraphPanel::GraphPanel(wxWindow *parent, wxSize size) : wxPanel(parent, wxID_ANY) {
     // Set minimum size for the graph panel
-    SetMinSize(size);
-    ∞
-    SetMaxSize(size);
+    wxWindowBase::SetMinSize(size);
+    wxWindowBase::SetMaxSize(size);
 
-    // Set background color
-    SetBackgroundColour(wxColour(32, 32, 32));
+    // Set background colorSetBackgroundColour(wxColour(32, 32, 32));
 
     // Bind paint event
     Bind(wxEVT_PAINT, &GraphPanel::OnPaint, this);
@@ -54,7 +52,7 @@ void GraphPanel::OnPaint(wxPaintEvent &event) {
 
     wxPoint prevPoint;
     for (size_t i = 0; i < m_data.size(); i++) {
-        int x = padding + static_cast<int>(i * xStep);
+        int x = padding + static_cast<int>(static_cast<double>(i) * xStep);
         int y = padding + drawHeight - static_cast<int>((m_data[i] / maxVal) * drawHeight);
 
         if (i > 0) {
