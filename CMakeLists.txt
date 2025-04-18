@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
-project(wx_cmake_fetchcontent_template LANGUAGES CXX)
+project(usb_meter_osd LANGUAGES CXX)
 
 include(FetchContent)
 
@@ -19,7 +19,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(wxWidgets)
 set(EXECUTABLE_NAME "wxWindows Test Drive")
 
-set(SRCS main.cpp)
+set(SRCS main.cpp
+        GraphPanel.cpp
+        GraphPanel.h)
 if(APPLE)
     # create bundle on apple compiles
     add_executable(main MACOSX_BUNDLE ${SRCS})
