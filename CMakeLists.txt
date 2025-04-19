@@ -7,6 +7,13 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Set architecture for macOS builds
+if (APPLE)
+    # For universal binary (works on both Intel and Apple Silicon)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+    # Or for Intel-only: set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif ()
+
 set(wxBUILD_SHARED OFF)
 
 message(STATUS "Fetching wxWidgets...")
