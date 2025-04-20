@@ -1,12 +1,8 @@
+//
+// Created by Thomas Lamy on 11.04.25.
+//
+
 #include "SerialPortEnumerator.h"
-
-#include <vector>
-#include <wx/string.h>
-
-#ifdef __WXMSW__  // Only for Windows
-#include <wx/buffer.h>
-#include <wx/msw/registry.h>
-#endif
 
 #include <wx/arrstr.h>
 #include <wx/dir.h>
@@ -46,7 +42,7 @@ std::vector<wxString> SerialPortEnumerator::GetPortNames() {
 #ifdef __WXMAC__
     wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("tty.usbserial*"), wxDIR_FILES);
 #else
-    wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("ttyUSB*"), wxDIR_FILES);
+    wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("ttyS*"), wxDIR_FILES);
 #endif
     for (wxArrayString::const_iterator it = arrStrFiles.begin(); it != arrStrFiles.end(); ++it)
         vStrPortNames.push_back(*it);

@@ -13,9 +13,8 @@ protected:
     ExitCode Entry() override;
 
 private:
-    void updateStatus(const wxString &status);
-
-    bool measure_loop(const std::string &device);
+    void updateStatus(wxString status);
+    bool startMeasurement(std::string device);
 
 private:
     wxEvtHandler *m_frame;

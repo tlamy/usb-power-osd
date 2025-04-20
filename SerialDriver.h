@@ -13,30 +13,27 @@
 #ifndef CESERIAL_H
 #define CESERIAL_H
 #include <string>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <cstdint>
 
 #if defined(_WIN64) || defined(__WIN32__) || defined(_WIN32) || defined(WIN32) || defined(__WINDOWS__) || defined(__TOS_WIN__) || defined(__CYGWIN__)
-#ifndef CE_WINDOWS
+	#ifndef CE_WINDOWS
 		#define CE_WINDOWS
-#endif
+	#endif
 #elif defined(__linux__) || defined(unix) || defined(__unix) || defined(__unix__)
-#ifndef CE_LINUX
+	#ifndef CE_LINUX
 		#define CE_LINUX
-#endif
+	#endif
 #else
-#ifndef CE_NOS
-#define CE_NOS
-#endif
+	#ifndef CE_NOS
+		#define CE_NOS
+	#endif
 #endif
 
 #ifdef CE_WINDOWS
-#include <windows.h>
-#include <cstdint>
-#endif
-
-#ifdef CE_LINUX
-#include <inttypes.h>
-#include <memory.h>
+	#include <windows.h>
 #endif
 
 class ceSerial {
@@ -55,66 +52,36 @@ private:
 	BOOL fWaitingOnRead;
 	COMMTIMEOUTS timeouts_ori;
 #else
-	long fd; //serial_fd
+	long fd;//serial_fd
 #endif
-
 public:
 	static void Delay(unsigned long ms);
-
 	ceSerial();
-
 	ceSerial(std::string Device, long BaudRate, long DataSize, char ParityType, float NStopBits);
-
 	~ceSerial();
-
-	long Open(void); //return 0 if success
+	long Open(void);//return 0 if success
 	void Close();
-
-	char ReadChar(bool &success); //return read char if success
-	/**
-	 * Read a line from the serial port
-	 * @param buffer result buffer
-	 * @param size buffer size
-	 * @param timeout_ms
-	 * @return int Number of chars read (not including newline), or -1 on i/o error, -2 on timeout
-	 */
-	int ReadLine(char *buffer, size_t size, int timeout_ms = 1000); //read until newline or timeout
-	bool WriteChar(const char ch); ////return success flag
-	bool Write(const char *data); //write null terminated string and return success flag
-	bool Write(const char *data, long n);
-
-	bool WriteArr(const uint8_t *data, long n);
-
-	bool SetRTS(bool value); //return success flag
-	bool SetDTR(bool value); //return success flag
-	bool GetCTS(bool &success);
-
-	bool GetDSR(bool &success);
-
-	bool GetRI(bool &success);
-
-	bool GetCD(bool &success);
-
+	char ReadChar(bool& success);//return read char if success
+	bool WriteChar(const char ch);////return success flag
+	bool Write(const char *data);//write null terminated string and return success flag
+	bool Write(const char *data,long n);
+	bool WriteArr(const uint8_t *data,long n);
+	bool SetRTS(bool value);//return success flag
+	bool SetDTR(bool value);//return success flag
+	bool GetCTS(bool& success);
+	bool GetDSR(bool& success);
+	bool GetRI(bool& success);
+	bool GetCD(bool& success);
 	bool IsOpened();
-
 	void SetPortName(std::string Port);
-
 	std::string GetPort();
-
 	void SetBaudRate(long baudrate);
-
 	long GetBaudRate();
-
 	void SetDataSize(long nbits);
-
 	long GetDataSize();
-
 	void SetParity(char p);
-
 	char GetParity();
-
 	void SetStopBits(float nbits);
-
 	float GetStopBits();
 };
 #endif

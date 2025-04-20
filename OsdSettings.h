@@ -31,6 +31,10 @@ public:
 
     void init();
 
+    static std::string rgbToStyle(wxColour rgb);
+
+    std::string ampsStylesheet() const;
+
     wxColour voltsRgb(PowerDelivery::PD_VOLTS volts) const;
 
     std::string voltsStylesheet(PowerDelivery::PD_VOLTS volts) const;
@@ -44,7 +48,7 @@ public:
 private:
     wxColour setting2Rgb(const wxString &setting);
 
-    wxString rgb_to_string(const wxColour &rgb);
+    wxString rgb_to_string(wxColour rgb);
 
     wxLogStderr *m_log = new wxLogStderr;
 };

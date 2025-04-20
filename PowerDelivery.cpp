@@ -6,7 +6,7 @@
 const int PowerDelivery::pd_volts[PD_COUNT] = {0, 5, 9, 15, 20, 28, 36, 48};
 
 bool PowerDelivery::within(int value, int base_value) {
-  int variance = static_cast<int>(static_cast<float>(base_value) * 0.20); // 5%
+  int variance = static_cast<int>(static_cast<float>(base_value) * 0.05); // 5%
   return value >= base_value - variance && value <= base_value + variance;
 }
 

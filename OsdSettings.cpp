@@ -4,6 +4,7 @@
 #include <wx/fileconf.h>
 #include <wx/colour.h>
 #include <string>
+#include <format>
 #include <sstream>
 #include <wx/log.h>
 #include <wx/string.h>
@@ -15,19 +16,11 @@ void OsdSettings::init() {
     always_on_top = false;
     window_height = 200;
     window_width = 400;
+    volts_amps_font = "Monaco";
     volts_font_size = 42;
     amps_font_size = 42;
-#if WX_PLATFORM_MACOS
-    volts_amps_font = "Monaco";
-#elif WX_PLATFORM_WINDOWS
-    volts_amps_font = "Arial";
-#else
-    volts_amps_font = "Roboto Mono";
-    volts_font_size = 36;
-    amps_font_size = 36;
-#endif
     graph_height = 150;
-    color_bg = wxColour(0,0,0);
+    color_bg = wxColour("#000000");
     color_amps = wxColour(0xff, 0xff, 0xff);
     color_none = wxColour(0xee, 0xee, 0xee);
     color_5v = wxColour(0x00, 0xff, 0x00);
@@ -38,11 +31,25 @@ void OsdSettings::init() {
     color_36v = wxColour(0x00, 0xff, 0xff);
     color_48v = wxColour(0x00, 0x00, 0xff);
 
-    //loadSettings();
+    loadSettings();
+}
+
+std::string OsdSettings::rgbToStyle(wxColour rgb) {
+    char style[64];
+    std::snprintf(style, 64, "color: rgb(%u, %u, %u);", rgb.Red(), rgb.Green(), rgb.Blue());
+    return style;
+}
+
+std::string OsdSettings::ampsStylesheet() const {
+    return rgbToStyle(color_amps);
+}
+
+std::string OsdSettings::voltsStylesheet(PowerDelivery::PD_VOLTS volts) const {
+    return rgbToStyle(voltsRgb(volts));
 }
 
 wxColour OsdSettings::voltsRgb(PowerDelivery::PD_VOLTS volts) const {
-    auto color = wxColour(0xff, 0x33, 0x99);
+    wxColour color = wxColour(0xff, 0x33, 0x99);
     switch (volts) {
         case PowerDelivery::PD_NONE:
             color = (color_none);
@@ -167,7 +174,7 @@ wxColour OsdSettings::setting2Rgb(const wxString &setting) {
     return wxColour(wxAtoi(tokens.Item(0)), wxAtoi(tokens.Item(1)), wxAtoi(tokens.Item(2)));
 }
 
-wxString OsdSettings::rgb_to_string(const wxColour &rgb) {
+wxString OsdSettings::rgb_to_string(wxColour rgb) {
     wxString result;
     result.Printf("%1,%2,%3", rgb.Red(), rgb.Green(), rgb.Blue());
     return result;
