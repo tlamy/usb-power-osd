@@ -26,15 +26,37 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(wxWidgets)
 set(EXECUTABLE_NAME "USB-C Power")
 
-set(SRCS main.cpp
+set(SRCS
+        Application.cpp
         GraphPanel.cpp
-        GraphPanel.h)
+        GraphPanel.h
+        PowerDelivery.cpp
+        PowerDelivery.h
+        OsdSettings.cpp
+        OsdSettings.h
+        SerialThread.cpp
+        SerialThread.h
+        SerialDriver.cpp
+        SerialDriver.h
+        SerialPortEnumerator.cpp
+        SerialPortEnumerator.h
+        Events.h
+        Events.cpp
+)
 if(APPLE)
     # create bundle on apple compiles
     add_executable(usbc-power-osd MACOSX_BUNDLE ${SRCS})
 
+    list(APPEND SRC_FILES ./wxmac.icns)
+
     # Set a custom plist file for the app bundle - needed for Mac OS Retina display
-    set_target_properties(usbc-power-osd PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+    set_target_properties(usbc-power-osd PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+            RESOURCE "./wxmac.icns"
+            MACOSX_BUNDLE_ICON_FILE wxmac.icns
+            MACOSX_BUNDLE_COPYRIGHT "Copyright MacWake.de"
+            MACOSX_BUNDLE_GUI_IDENTIFIER "de.macwake.usbosd"
+    )
 else()
     # the WIN32 is needed for Windows in order for it to look for WinMain
     # instead of the main function. This is ignored on other systems,

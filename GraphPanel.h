@@ -4,6 +4,9 @@
 
 #ifndef GRAPHPANEL_H
 #define GRAPHPANEL_H
+#include <deque>
+
+#include "PowerDelivery.h"
 #include "wx/panel.h"
 
 
@@ -11,10 +14,20 @@ class GraphPanel : public wxPanel {
 public:
     GraphPanel(wxWindow *parent, wxSize size);
 
+    enum graph_style {
+        STYLE_BAR = false,
+        STYLE_LINE = true,
+    };
+    void add(int current, PowerDelivery::PD_VOLTS voltage);
+
 private:
     void OnPaint(wxPaintEvent &event);
 
-    std::vector<double> m_data;  // Graph data points
+    bool m_graph_style = STYLE_BAR;
+    std::deque<int> m_currents;
+    std::deque<PowerDelivery::PD_VOLTS> m_voltages;
+    int m_maxBarValue;
+    int m_size;
 };
 
 
