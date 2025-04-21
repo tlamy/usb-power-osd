@@ -18,6 +18,7 @@ public:
         STYLE_BAR = false,
         STYLE_LINE = true,
     };
+
     void add(int current, PowerDelivery::PD_VOLTS voltage);
 
 private:

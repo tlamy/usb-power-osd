@@ -22,10 +22,10 @@
 #ifdef CE_WINDOWS
 	#define READ_TIMEOUT 10      // milliseconds
 #else
-	#include <unistd.h>
-	#include <fcntl.h>
-	#include <termios.h>
-	#include <sys/ioctl.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <sys/ioctl.h>
 #ifdef CE_LINUX
 	#include <linux/serial.h>
 #endif
@@ -37,89 +37,89 @@
 	#include <sys/file.h>
 #endif
 
-inline void ceSerial::Delay(unsigned long ms) {
+void ceSerial::Delay(unsigned long ms) {
 #ifdef CE_WINDOWS
 	Sleep(ms);
 #else
-	usleep(ms*1000);
+    usleep(ms * 1000);
 #endif
 }
 
-inline ceSerial::ceSerial() :
+ceSerial::ceSerial() :
 #ifdef CE_WINDOWS
 	ceSerial("\\\\.\\COM1", 9600, 8, 'N', 1)
 #else
-	ceSerial("/dev/ttyS0", 9600, 8, 'N', 1)
+    ceSerial("/dev/ttyS0", 9600, 8, 'N', 1)
 #endif
 {
-
 }
 
-inline ceSerial::ceSerial(std::string Device, long BaudRate,long DataSize,char ParityType,float NStopBits):stdbaud(true) {
+ceSerial::ceSerial(std::string Device, long BaudRate, long DataSize, char ParityType,
+                   float NStopBits): stdbaud(true) {
 #ifdef CE_WINDOWS
 	hComm = INVALID_HANDLE_VALUE;
 #else
-	fd = -1;
+    fd = -1;
 #endif // defined
-	SetBaudRate(BaudRate);
-	SetDataSize(DataSize);
-	SetParity(ParityType);
-	SetStopBits(NStopBits);
-	SetPortName(Device);
+    SetBaudRate(BaudRate);
+    SetDataSize(DataSize);
+    SetParity(ParityType);
+    SetStopBits(NStopBits);
+    SetPortName(Device);
 }
 
-inline ceSerial::~ceSerial() {
-	Close();
+ceSerial::~ceSerial() {
+    Close();
 }
 
-inline void ceSerial::SetPortName(std::string Device) {
-	port = Device;
+void ceSerial::SetPortName(std::string Device) {
+    port = Device;
 }
 
-inline std::string ceSerial::GetPort() {
-	return port;
+std::string ceSerial::GetPort() {
+    return port;
 }
 
-inline void ceSerial::SetDataSize(long nbits) {
-	if ((nbits < 5) || (nbits > 8)) nbits = 8;
-	dsize=nbits;
+void ceSerial::SetDataSize(long nbits) {
+    if ((nbits < 5) || (nbits > 8)) nbits = 8;
+    dsize = nbits;
 }
 
-inline long ceSerial::GetDataSize() {
-	return dsize;
+long ceSerial::GetDataSize() {
+    return dsize;
 }
 
-inline void ceSerial::SetParity(char p) {
-	if ((p != 'N') && (p != 'E') && (p != 'O')) {
+void ceSerial::SetParity(char p) {
+    if ((p != 'N') && (p != 'E') && (p != 'O')) {
 #ifdef CE_WINDOWS
 		if ((p != 'M') && (p != 'S')) p = 'N';
 #else
-		p = 'N';
+        p = 'N';
 #endif
-	}
-	parity = p;
+    }
+    parity = p;
 }
 
-inline char ceSerial::GetParity() {
-	return parity;
+char ceSerial::GetParity() {
+    return parity;
 }
 
-inline void ceSerial::SetStopBits(float nbits) {
-	if (nbits >= 2) stopbits = 2;
+void ceSerial::SetStopBits(float nbits) {
+    if (nbits >= 2) stopbits = 2;
 #ifdef CE_WINDOWS
 	else if(nbits >= 1.5) stopbits = 1.5;
 #endif
-	else stopbits = 1;
+    else stopbits = 1;
 }
 
-inline float ceSerial::GetStopBits() {
-	return stopbits;
+float ceSerial::GetStopBits() {
+    return stopbits;
 }
 
 
 #ifdef CE_WINDOWS
 
-inline void ceSerial::SetBaudRate(long baudrate) {
+void ceSerial::SetBaudRate(long baudrate) {
 	stdbaud = true;
 	if (baudrate == 110) baud = CBR_110;
 	else if (baudrate == 300) baud = CBR_300;
@@ -141,11 +141,11 @@ inline void ceSerial::SetBaudRate(long baudrate) {
 	}
 }
 
-inline long ceSerial::GetBaudRate() {
+long ceSerial::GetBaudRate() {
 	return baud;
 }
 
-inline long ceSerial::Open() {
+long ceSerial::Open() {
 	if (IsOpened()) return 0;
 #ifdef UNICODE
 	std::wstring wtext(port.begin(),port.end());
@@ -219,7 +219,7 @@ inline long ceSerial::Open() {
 	return 0;
 }
 
-inline void ceSerial::Close() {
+void ceSerial::Close() {
 	if (IsOpened())
 	{
 		SetCommTimeouts(hComm, &timeouts_ori);
@@ -230,12 +230,12 @@ inline void ceSerial::Close() {
 	}
 }
 
-inline bool ceSerial::IsOpened() {
+bool ceSerial::IsOpened() {
 	if(hComm == INVALID_HANDLE_VALUE) return false;
 	else return true;
 }
 
-inline bool ceSerial::Write(const char *data) {
+bool ceSerial::Write(const char *data) {
 	if (!IsOpened()) {
 		return false;
 	}
@@ -258,7 +258,7 @@ inline bool ceSerial::Write(const char *data) {
 	return fRes;
 }
 
-inline bool ceSerial::Write(const char *data,long n) {
+bool ceSerial::Write(const char *data,long n) {
 	if (!IsOpened()) {
 		return false;
 	}
@@ -280,7 +280,7 @@ inline bool ceSerial::Write(const char *data,long n) {
 	return fRes;
 }
 
-inline bool ceSerial::WriteArr(const uint8_t *data,long n) {
+bool ceSerial::WriteArr(const uint8_t *data,long n) {
 	if (!IsOpened()) {
 		return false;
 	}
@@ -302,11 +302,11 @@ inline bool ceSerial::WriteArr(const uint8_t *data,long n) {
 	return fRes;
 }
 
-inline bool ceSerial::WriteChar(const char ch) {
+bool ceSerial::WriteChar(const char ch) {
 	return Write((char*)&ch, 1);
 }
 
-inline char ceSerial::ReadChar(bool& success) {
+char ceSerial::ReadChar(bool& success) {
 	success = false;
 	if (!IsOpened()) {return 0;}
 
@@ -352,7 +352,7 @@ inline char ceSerial::ReadChar(bool& success) {
 	return rxchar;
 }
 
-inline bool ceSerial::SetRTS(bool value) {
+bool ceSerial::SetRTS(bool value) {
 	bool r = false;
 	if (IsOpened()) {
 		if (value) {
@@ -365,7 +365,7 @@ inline bool ceSerial::SetRTS(bool value) {
 	return r;
 }
 
-inline bool ceSerial::SetDTR(bool value) {
+bool ceSerial::SetDTR(bool value) {
 	bool r = false;
 	if (IsOpened()) {
 		if (value) {
@@ -378,7 +378,7 @@ inline bool ceSerial::SetDTR(bool value) {
 	return r;
 }
 
-inline bool ceSerial::GetCTS(bool& success) {
+bool ceSerial::GetCTS(bool& success) {
 	success = false;
 	bool r = false;
 	if (IsOpened()) {
@@ -391,7 +391,7 @@ inline bool ceSerial::GetCTS(bool& success) {
 	return r;
 }
 
-inline bool ceSerial::GetDSR(bool& success) {
+bool ceSerial::GetDSR(bool& success) {
 	success = false;
 	bool r = false;
 	if (IsOpened()) {
@@ -404,7 +404,7 @@ inline bool ceSerial::GetDSR(bool& success) {
 	return r;
 }
 
-inline bool ceSerial::GetRI(bool& success) {
+bool ceSerial::GetRI(bool& success) {
 	success = false;
 	bool r = false;
 	if (IsOpened()) {
@@ -417,7 +417,7 @@ inline bool ceSerial::GetRI(bool& success) {
 	return r;
 }
 
-inline bool ceSerial::GetCD(bool& success) {
+bool ceSerial::GetCD(bool& success) {
 	success = false;
 	bool r = false;
 	if (IsOpened()) {
@@ -432,35 +432,35 @@ inline bool ceSerial::GetCD(bool& success) {
 
 #else  //for POSIX
 
-inline long ceSerial::Open(void) {
+long ceSerial::Open(void) {
 #ifdef WE_LINUX
 	struct serial_struct serinfo;
 #endif
-	struct termios settings;
-	memset(&settings, 0, sizeof(settings));
-	settings.c_iflag = 0;
-	settings.c_oflag = 0;
+    struct termios settings;
+    memset(&settings, 0, sizeof(settings));
+    settings.c_iflag = 0;
+    settings.c_oflag = 0;
 
-	settings.c_cflag = CREAD | CLOCAL;//see termios.h for more information
-	if(dsize==5)  settings.c_cflag |= CS5;//no change
-	else if (dsize == 6)  settings.c_cflag |= CS6;
-	else if (dsize == 7)  settings.c_cflag |= CS7;
-	else settings.c_cflag |= CS8;
+    settings.c_cflag = CREAD | CLOCAL; //see termios.h for more information
+    if (dsize == 5) settings.c_cflag |= CS5; //no change
+    else if (dsize == 6) settings.c_cflag |= CS6;
+    else if (dsize == 7) settings.c_cflag |= CS7;
+    else settings.c_cflag |= CS8;
 
-	if(stopbits==2) settings.c_cflag |= CSTOPB;
+    if (stopbits == 2) settings.c_cflag |= CSTOPB;
 
-	if(parity!='N') settings.c_cflag |= PARENB;
+    if (parity != 'N') settings.c_cflag |= PARENB;
 
-	if (parity == 'O') settings.c_cflag |= PARODD;
+    if (parity == 'O') settings.c_cflag |= PARODD;
 
-	settings.c_lflag = 0;
-	settings.c_cc[VMIN] = 1;
-	settings.c_cc[VTIME] = 0;
+    settings.c_lflag = 0;
+    settings.c_cc[VMIN] = 1;
+    settings.c_cc[VTIME] = 0;
 
-	fd = open(port.c_str(), O_RDWR | O_NONBLOCK);
-	if (fd == -1) {
-		return -1;
-	}
+    fd = open(port.c_str(), O_RDWR | O_NONBLOCK);
+    if (fd == -1) {
+        return -1;
+    }
 
 #ifdef WE_LINUX
 	if (tcgetattr(fd, &settings) < 0) {}
@@ -486,14 +486,14 @@ inline long ceSerial::Open(void) {
 	}
 	else {
 #endif
-		cfsetospeed(&settings, baud);
-		cfsetispeed(&settings, baud);
+    cfsetospeed(&settings, baud);
+    cfsetispeed(&settings, baud);
 #ifdef WE_LINUX
 	}
 #endif
-	tcsetattr(fd, TCSANOW, &settings);
-	int flags = fcntl(fd, F_GETFL, 0);
-	fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    tcsetattr(fd, TCSANOW, &settings);
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
 #ifdef WE_LINUX
 	if (!stdbaud) {
@@ -503,134 +503,254 @@ inline long ceSerial::Open(void) {
 		ioctl(fd, TIOCSSERIAL, &serinfo);
 	}
 #endif
-	return 0;
+    return 0;
 }
 
-inline void ceSerial::Close() {
-	if(IsOpened()) close(fd);
-	fd=-1;
+void ceSerial::Close() {
+    if (IsOpened()) close(fd);
+    fd = -1;
 }
 
-inline bool ceSerial::IsOpened() {
-	if(fd== (-1)) return false;
-	else return true;
+bool ceSerial::IsOpened() {
+    if (fd == (-1)) return false;
+    else return true;
 }
 
 #endif
 
-inline void ceSerial::SetBaudRate(long baudrate) {
-	stdbaud = true;
-	if (baudrate == 0) baud = B0;
-	else if (baudrate == 50) baud = B50;
-	else if (baudrate == 75) baud = B75;
-	else if (baudrate == 110) baud = B110;
-	else if (baudrate == 134) baud = B134;
-	else if (baudrate == 150) baud = B150;
-	else if (baudrate == 200) baud = B200;
-	else if (baudrate == 300) baud = B300;
-	else if (baudrate == 600) baud = B600;
-	else if (baudrate == 1200) baud = B1200;
-	else if (baudrate == 2400) baud = B2400;
-	else if (baudrate == 4800) baud = B4800;
-	else if (baudrate == 9600) baud = B9600;
-	else if (baudrate == 19200) baud = B19200;
-	else if (baudrate == 38400) baud = B38400;
-	else if (baudrate == 57600) baud = B57600;
-	else if (baudrate == 115200) baud = B115200;
-	else if (baudrate == 230400) baud = B230400;
-	else {
-		baud = baudrate;
-		stdbaud = false;
-	}
+void ceSerial::SetBaudRate(long baudrate) {
+    stdbaud = true;
+    if (baudrate == 0) baud = B0;
+    else if (baudrate == 50) baud = B50;
+    else if (baudrate == 75) baud = B75;
+    else if (baudrate == 110) baud = B110;
+    else if (baudrate == 134) baud = B134;
+    else if (baudrate == 150) baud = B150;
+    else if (baudrate == 200) baud = B200;
+    else if (baudrate == 300) baud = B300;
+    else if (baudrate == 600) baud = B600;
+    else if (baudrate == 1200) baud = B1200;
+    else if (baudrate == 2400) baud = B2400;
+    else if (baudrate == 4800) baud = B4800;
+    else if (baudrate == 9600) baud = B9600;
+    else if (baudrate == 19200) baud = B19200;
+    else if (baudrate == 38400) baud = B38400;
+    else if (baudrate == 57600) baud = B57600;
+    else if (baudrate == 115200) baud = B115200;
+    else if (baudrate == 230400) baud = B230400;
+    else {
+        baud = baudrate;
+        stdbaud = false;
+    }
 }
 
-inline long ceSerial::GetBaudRate() {
-	return baud;
+long ceSerial::GetBaudRate() {
+    return baud;
 }
 
-inline char ceSerial::ReadChar(bool& success) {
-	success=false;
-	if (!IsOpened()) {return 0;	}
-	success=read(fd, &rxchar, 1)==1;
-	return rxchar;
+char ceSerial::ReadChar(bool &success) {
+    success = false;
+    if (!IsOpened()) { return 0; }
+    success = read(fd, &rxchar, 1) == 1;
+    return rxchar;
 }
 
-inline bool ceSerial::Write(const char *data) {
-	if (!IsOpened()) {return false;	}
-	long n = strlen(data);
-	if (n < 0) n = 0;
-	else if(n > 1024) n = 1024;
-	return (write(fd, data, n)==n);
+int ceSerial::ReadLine(char *buffer, size_t size, int timeout_ms) {
+    if (!IsOpened()) { return -3; }
+    size_t bytes_read = 0;
+    buffer[0] = '\0';
+#ifdef CE_WINDOWS
+    // Windows implementation using ReadFile with timeout
+    DWORD dwRead;
+    COMMTIMEOUTS timeouts;
+
+    // Save original timeouts
+    GetCommTimeouts(hComm, &timeouts);
+
+    // Set new timeouts
+    COMMTIMEOUTS newTimeouts;
+    newTimeouts.ReadIntervalTimeout = MAXDWORD;
+    newTimeouts.ReadTotalTimeoutMultiplier = 0;
+    newTimeouts.ReadTotalTimeoutConstant = timeout_ms;
+    newTimeouts.WriteTotalTimeoutMultiplier = 0;
+    newTimeouts.WriteTotalTimeoutConstant = 0;
+
+    SetCommTimeouts(hComm, &newTimeouts);
+
+    // Read characters until newline or max size reached
+    while (bytes_read < size - 1) {
+        char ch;
+        if (!ReadFile(hComm, &ch, 1, &dwRead, NULL) || dwRead == 0) {
+            break; // Error or timeout
+        }
+
+        buffer[bytes_read++] = ch;
+
+        // Check for newline
+        if (ch == '\n') {
+            break;
+        }
+    }
+
+    // Restore original timeouts
+    SetCommTimeouts(hComm, &timeouts);
+
+#else // Linux/UNIX implementation using select()
+    // Set up file descriptor set for select()
+    fd_set readfds;
+    struct timeval tv;
+
+    // Calculate total timeout end time
+    struct timeval end_time;
+    gettimeofday(&end_time, NULL);
+    end_time.tv_sec += timeout_ms / 1000;
+    end_time.tv_usec += (timeout_ms % 1000) * 1000;
+    if (end_time.tv_usec >= 1000000) {
+        end_time.tv_sec += 1;
+        end_time.tv_usec -= 1000000;
+    }
+
+    while (bytes_read < size - 1) {
+        // Calculate remaining timeout
+        struct timeval now;
+        gettimeofday(&now, NULL);
+
+        if (now.tv_sec > end_time.tv_sec ||
+            (now.tv_sec == end_time.tv_sec && now.tv_usec >= end_time.tv_usec)) {
+            break; // Total timeout reached
+        }
+
+        // Calculate time remaining
+        tv.tv_sec = end_time.tv_sec - now.tv_sec;
+        if (end_time.tv_usec < now.tv_usec) {
+            tv.tv_sec--;
+            tv.tv_usec = 1000000 + end_time.tv_usec - now.tv_usec;
+        } else {
+            tv.tv_usec = end_time.tv_usec - now.tv_usec;
+        }
+
+        // Set up the file descriptor set
+        FD_ZERO(&readfds);
+        FD_SET(fd, &readfds);
+
+        // Wait for data to become available
+        int select_result = select(fd + 1, &readfds, NULL, NULL, &tv);
+
+        if (select_result < 0) {
+            // Error in select()
+            return -1;
+        } else if (select_result == 0) {
+            // Timeout occurred
+            return -2;
+        }
+
+        // Data is available to read
+        char ch;
+        int n = read(fd, &ch, 1);
+
+        if (n <= 0) {
+            // Error or end of file
+            return -1;
+        }
+
+
+        // Check for newline
+        if (ch == '\n') {
+            break;
+        }
+        buffer[bytes_read++] = ch;
+    }
+#endif
+
+    // Null-terminate the string
+    buffer[bytes_read] = '\0';
+
+    // Return nullptr if nothing was read
+    if (bytes_read == 0) {
+        return 0;
+    }
+
+    return bytes_read;
 }
 
-inline bool ceSerial::Write(const char *data,long n) {
-	if (!IsOpened()) {return false;	}
-	if (n < 0) n = 0;
-	else if(n > 1024) n = 1024;
-	return (write(fd, data, n)==n);
+bool ceSerial::Write(const char *data) {
+    if (!IsOpened()) { return false; }
+    long n = strlen(data);
+    if (n < 0) n = 0;
+    else if (n > 1024) n = 1024;
+    return (write(fd, data, n) == n);
 }
 
-inline bool ceSerial::WriteArr(const uint8_t *data,long n) {
-	if (!IsOpened()) {return false;	}
-	if (n < 0) n = 0;
-	else if(n > 1024) n = 1024;
-	return (write(fd, data, n)==n);
+bool ceSerial::Write(const char *data, long n) {
+    if (!IsOpened()) { return false; }
+    if (n < 0) n = 0;
+    else if (n > 1024) n = 1024;
+    return (write(fd, data, n) == n);
 }
 
-inline bool ceSerial::WriteChar(const char ch) {
-	return Write((char*)&ch, 1);
+bool ceSerial::WriteArr(const uint8_t *data, long n) {
+    if (!IsOpened()) { return false; }
+    if (n < 0) n = 0;
+    else if (n > 1024) n = 1024;
+    return (write(fd, data, n) == n);
 }
 
-inline bool ceSerial::SetRTS(bool value) {
-	long RTS_flag = TIOCM_RTS;
-	bool success=true;
-	if (value) {//Set RTS pin
-		if (ioctl(fd, TIOCMBIS, &RTS_flag) == -1) success=false;
-	}
-	else {//Clear RTS pin
-		if (ioctl(fd, TIOCMBIC, &RTS_flag) == -1) success=false;
-	}
-	return success;
+bool ceSerial::WriteChar(const char ch) {
+    return Write((char *) &ch, 1);
 }
 
-inline bool ceSerial::SetDTR(bool value) {
-	long DTR_flag = TIOCM_DTR;
-	bool success=true;
-	if (value) {//Set DTR pin
-		if (ioctl(fd, TIOCMBIS, &DTR_flag) == -1) success=false;
-	}
-	else {//Clear DTR pin
-		if (ioctl(fd, TIOCMBIC, &DTR_flag) == -1) success=false;
-	}
-	return success;
+bool ceSerial::SetRTS(bool value) {
+    long RTS_flag = TIOCM_RTS;
+    bool success = true;
+    if (value) {
+        //Set RTS pin
+        if (ioctl(fd, TIOCMBIS, &RTS_flag) == -1) success = false;
+    } else {
+        //Clear RTS pin
+        if (ioctl(fd, TIOCMBIC, &RTS_flag) == -1) success = false;
+    }
+    return success;
 }
 
-inline bool ceSerial::GetCTS(bool& success) {
-	success=true;
-	long status;
-	if(ioctl(fd, TIOCMGET, &status)== -1) success=false;
-	return ((status & TIOCM_CTS) != 0);
+bool ceSerial::SetDTR(bool value) {
+    long DTR_flag = TIOCM_DTR;
+    bool success = true;
+    if (value) {
+        //Set DTR pin
+        if (ioctl(fd, TIOCMBIS, &DTR_flag) == -1) success = false;
+    } else {
+        //Clear DTR pin
+        if (ioctl(fd, TIOCMBIC, &DTR_flag) == -1) success = false;
+    }
+    return success;
 }
 
-inline bool ceSerial::GetDSR(bool& success) {
-	success=true;
-	long status;
-	if(ioctl(fd, TIOCMGET, &status)== -1) success=false;
-	return ((status & TIOCM_DSR) != 0);
+bool ceSerial::GetCTS(bool &success) {
+    success = true;
+    long status;
+    if (ioctl(fd, TIOCMGET, &status) == -1) success = false;
+    return ((status & TIOCM_CTS) != 0);
 }
 
-inline bool ceSerial::GetRI(bool& success) {
-	success=true;
-	long status;
-	if(ioctl(fd, TIOCMGET, &status)== -1) success=false;
-	return ((status & TIOCM_RI) != 0);
+bool ceSerial::GetDSR(bool &success) {
+    success = true;
+    long status;
+    if (ioctl(fd, TIOCMGET, &status) == -1) success = false;
+    return ((status & TIOCM_DSR) != 0);
 }
 
-inline bool ceSerial::GetCD(bool& success) {
-	success=true;
-	long status;
-	if(ioctl(fd, TIOCMGET, &status)== -1) success=false;
-	return ((status & TIOCM_CD) != 0);
+bool ceSerial::GetRI(bool &success) {
+    success = true;
+    long status;
+    if (ioctl(fd, TIOCMGET, &status) == -1) success = false;
+    return ((status & TIOCM_RI) != 0);
+}
+
+bool ceSerial::GetCD(bool &success) {
+    success = true;
+    long status;
+    if (ioctl(fd, TIOCMGET, &status) == -1) success = false;
+    return ((status & TIOCM_CD) != 0);
 }
 #endif
 
