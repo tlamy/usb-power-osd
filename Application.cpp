@@ -9,6 +9,7 @@
 #include "Events.h"
 #include "OsdSettings.h"
 #include "GraphPanel.h"
+#include "MeasurementEvent.h"
 #include "SerialThread.h"
 
 class MyApp : public wxApp {
@@ -18,7 +19,6 @@ public:
 
 
 wxIMPLEMENT_APP(MyApp);
-
 
 
 bool MyApp::OnInit() {
@@ -52,6 +52,7 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     SetMenuBar(m_menuBar);
 
     Bind(wxEVT_STATUS_UPDATE, &MyFrame::OnStatusUpdate, this);
+    Bind(wxEVT_MEASUREMENT, &MyFrame::OnDataUpdate, this);
 
     this->SetMaxSize(size);
     this->SetMinSize(size);
@@ -73,11 +74,11 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     this->m_voltage->SetFont(font);
     label2->SetFont(font);
 
-    this->m_status_text = new wxStaticText(panel, wxID_ANY, "Status text",wxDefaultPosition, wxSize(size.x, wxDefaultCoord), wxALIGN_CENTER_HORIZONTAL);
+    this->m_status_text = new wxStaticText(panel, wxID_ANY, "Status text", wxDefaultPosition,
+                                           wxSize(size.x, wxDefaultCoord), wxALIGN_CENTER_HORIZONTAL);
     this->m_status_text->SetFont(font);
-    // Create and add the graph panel below the top row
-    auto graphPanel = new GraphPanel(panel, wxSize(size.x, 200));
-    graphPanel->SetBackgroundColour(wxColour("#000000"));
+    m_graph_panel = new GraphPanel(panel, wxSize(size.x, 200));
+    m_graph_panel->SetBackgroundColour(wxColour("#000000"));
 
     // Create a main sizer for the panel
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -101,7 +102,7 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     // Add a stretch spacer to push everything to the top
     mainSizer->AddStretchSpacer(1);
 
-    mainSizer->Add(graphPanel, 1, wxEXPAND | wxALL, 10);
+    mainSizer->Add(m_graph_panel, 1, wxEXPAND | wxALL, 10);
 
     // Set the sizer for the panel
     panel->SetSizer(mainSizer);
@@ -115,7 +116,6 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
         delete this->serial_thread;
         this->serial_thread = nullptr;
     }
-
 }
 
 void MyFrame::Exit(wxCommandEvent &) {
@@ -149,11 +149,19 @@ void MyFrame::OnModeChange(wxCommandEvent &event) {
 }
 
 void MyFrame::OnStatusUpdate(wxThreadEvent &event) {
-    std::cerr << "Status update: " << event.GetString() << endl;
-    this->m_status_text->SetLabel(event.GetString());
+    wxString status = event.GetString();
+    if (status.length() == 0) {
+        this->m_status_text->Hide();
+    } else {
+        this->m_status_text->SetLabel(status);
+        this->m_status_text->Show();
+    }
 }
 
 void MyFrame::OnDataUpdate(wxThreadEvent &event) {
+    MeasurementEvent* theEvent = static_cast<MeasurementEvent *>(&event);
+
+    this->m_graph_panel->add(theEvent->GetMilliAmps(), PowerDelivery::getEnum(theEvent->GetMilliVolts()));
 }
 
 void MyFrame::About(wxCommandEvent &) {

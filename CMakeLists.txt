@@ -42,6 +42,8 @@ set(SRCS
         SerialPortEnumerator.h
         Events.h
         Events.cpp
+        MeasurementEvent.cpp
+        MeasurementEvent.h
 )
 if(APPLE)
     # create bundle on apple compiles

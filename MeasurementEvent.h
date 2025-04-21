@@ -5,17 +5,16 @@
 
 wxDECLARE_EVENT(wxEVT_MEASUREMENT, wxThreadEvent);
 
-class MeasurementEvent : public wxThreadEvent {
+class MeasurementEvent : public wxThreadEvent{
 public:
     MeasurementEvent(int millivolts, int milliamps)
-        : wxThreadEvent(wxEVT_MEASUREMENT), m_millivolts(millivolts), m_milliamps(milliamps) {
-    }
+        : wxThreadEvent(wxEVT_MEASUREMENT), m_millivolts(millivolts), m_milliamps(milliamps) {}
 
     // Clone is required for thread events
-    wxEvent *Clone() const override { return new MeasurementEvent(*this); }
+    virtual wxEvent* Clone() const override { return new MeasurementEvent(*this); }
 
-    [[nodiscard]] int GetMilliVolts() const { return m_millivolts; }
-    [[nodiscard]] int GetMilliAmps() const { return m_milliamps; }
+    int GetMilliVolts() const { return m_millivolts; }
+    int GetMilliAmps() const { return m_milliamps; }
 
 private:
     int m_millivolts;
