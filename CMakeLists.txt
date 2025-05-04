@@ -4,7 +4,7 @@ project(usb_meter_osd LANGUAGES CXX)
 
 if(APPLE)
     # Setzen Sie dies direkt nach dem project() Befehl
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
 endif()
 
 include(FetchContent)
