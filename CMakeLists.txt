@@ -7,6 +7,7 @@ if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
     # Needed for gettimeofday() on some macOS versions
     add_definitions(-D_DARWIN_C_SOURCE)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 endif()
 
 include(FetchContent)
@@ -14,14 +15,12 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Set architecture for macOS builds
-if (APPLE)
-    # For universal binary (works on both Intel and Apple Silicon)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
-    # Or for Intel-only: set(CMAKE_OSX_ARCHITECTURES "x86_64")
-endif ()
 
 set(wxBUILD_SHARED OFF)
+set(wxUSE_WEBVIEW OFF)
+set(wxUSE_REGEX OFF)
+set(wxUSE_EXPAT OFF)
+set(wxUSE_LIBTIFF OFF)
 
 message(STATUS "Fetching wxWidgets...")
 

@@ -73,7 +73,9 @@ void SerialThread::updateStatus(const wxString &status) {
         std::cerr << "m_frame is NULL!!!" << std::endl;
         return;
     }
-    wxQueueEvent(this->m_frame, event);
+    if (!TestDestroy()) {
+        wxQueueEvent(this->m_frame, event);
+    }
 }
 
 bool SerialThread::measure_loop(const std::string &device) {
@@ -155,15 +157,14 @@ bool SerialThread::measure_loop(const std::string &device) {
         int milliamps = abs((int) (static_cast<double>(shunt_voltage) * current_quanta));
         int millivolts = static_cast<int>(bus_voltage * voltage_quanta);
 
+        if (TestDestroy()) break;
         MeasurementEvent *event;
-        if (false && millivolts < 1000) {
-            event = new MeasurementEvent(millivolts, 0);
-        } else {
-            event = new MeasurementEvent(millivolts, milliamps);
-        }
+        event = new MeasurementEvent(millivolts, milliamps);
         wxQueueEvent(this->m_frame, event);
     }
-    wxQueueEvent(this->m_frame, new MeasurementEvent(0, 0));
+    if (!TestDestroy()) {
+        wxQueueEvent(this->m_frame, new MeasurementEvent(0, 0));
+    }
     port->Close();
     return true;
 }
@@ -176,8 +177,7 @@ wxThread::ExitCode SerialThread::Entry() {
         if (TestDestroy())
             break;
 
-        updateStatus("Searching...");
-        for (auto port: enumerator->GetPortNames()) {
+        for (const auto& port: enumerator->GetPortNames()) {
             updateStatus(wxString::Format("Trying %s",
                                           std::filesystem::path(std::string(port.c_str())).filename().string()
             ));
