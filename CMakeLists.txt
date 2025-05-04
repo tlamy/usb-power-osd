@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
 project(usb_meter_osd LANGUAGES CXX)
 
+if(APPLE)
+    # Setzen Sie dies direkt nach dem project() Befehl
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
+endif()
+
 include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 20)

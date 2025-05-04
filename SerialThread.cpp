@@ -174,7 +174,7 @@ wxThread::ExitCode SerialThread::Entry() {
     while (true) {
         auto enumerator = new SerialPortEnumerator();
         if (TestDestroy())
-            return (ExitCode) 0;
+            break;
 
         updateStatus("Searching...");
         for (auto port: enumerator->GetPortNames()) {
@@ -184,8 +184,8 @@ wxThread::ExitCode SerialThread::Entry() {
             this->measure_loop(std::string(port.c_str()));
         }
         delete enumerator;
-        updateStatus("...");
-        wxThread::Sleep(5000); // Simulate long operation
+        updateStatus("Waiting for device");
+        wxThread::Sleep(1000);
     }
     return (wxThread::ExitCode) nullptr;
 }
