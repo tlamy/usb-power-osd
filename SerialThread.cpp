@@ -13,7 +13,7 @@
 
 #include "MeasurementEvent.h"
 
-enum FrameType { OSD_MODE_20V, OSD_MODE_28V };
+enum FrameType { OSD_MODE_20V = 20, OSD_MODE_28V = 28 };
 
 static int8_t hex2bin(unsigned char c) {
     if (c >= '0' && c <= '9') {
@@ -32,7 +32,7 @@ static int16_t hex4_to_uint16(const char *buf) {
     return val;
 }
 
-static void hexdump(char *buffer) {
+static void hexdump(const char *buffer) {
     bool isEof = false;
     bool isEof2 = false;
     for (int i = 0;; i += 16) {
@@ -66,10 +66,9 @@ static void hexdump(char *buffer) {
 }
 
 
-void SerialThread::updateStatus(wxString status) {
-    wxThreadEvent *event = new wxThreadEvent(wxEVT_STATUS_UPDATE);
+void SerialThread::updateStatus(const wxString &status) {
+    auto *event = new wxThreadEvent(wxEVT_STATUS_UPDATE);
     event->SetString(status);
-    std::cerr << "Sending status update: " << status << std::endl;
     if (!this->m_frame) {
         std::cerr << "m_frame is NULL!!!" << std::endl;
         return;
@@ -77,34 +76,7 @@ void SerialThread::updateStatus(wxString status) {
     wxQueueEvent(this->m_frame, event);
 }
 
-int SerialThread::ReadLine(ceSerial *port, char *buffer, int size, int timeout = 1000) {
-    int index = 0;
-    bool success;
-    char c;
-    auto start = std::chrono::high_resolution_clock::now();
-    do {
-        c = port->ReadChar(success);
-        if (success) {
-            buffer[index++] = c;
-        } else {
-            std::cerr << "No data available" << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
-        }
-        if (index >= size - 1) {
-            return -1;
-        }
-        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(timeout)) {
-            std::cerr << "Timeout" << std::endl;
-            return -1;
-        }
-    } while (c != '\n');
-    buffer[index] = '\0';
-    if (index > 0)buffer[index - 1] = '\0';
-    return index;
-}
-
-bool SerialThread::measure_loop(std::string device) {
+bool SerialThread::measure_loop(const std::string &device) {
     auto port = new ceSerial(device, 9600, 8, 'N', 1);
     if (port->Open() != 0) {
         std::cerr << "Failed to open" << device << std::endl;
@@ -116,7 +88,6 @@ bool SerialThread::measure_loop(std::string device) {
         std::cerr << "Read error" << std::endl;
         return false;
     }
-    std::cerr << "Read: " << line << std::endl;
 
     bytes_read = port->ReadLine(line, 100, 1000);
     if (bytes_read < 0) {
@@ -124,22 +95,20 @@ bool SerialThread::measure_loop(std::string device) {
         port->Close();
         return false;
     }
-    //std::cerr << "Read: " << line << std::endl;
-    hexdump(line);
-    if (bytes_read != 10 && bytes_read != 9) {
-        std::cerr << "Wrong string length: " << bytes_read << std::endl;
+    // hexdump(line);
+    if (bytes_read != 8 && bytes_read != 9) {
         port->Close();
         return false;
     }
     int frame_type;
-    if (bytes_read == 10) {
+    if (bytes_read == 9) {
         frame_type = OSD_MODE_20V;
         if (line[8] == OSD_MODE_28V) {
             frame_type = OSD_MODE_28V;
         } else if (line[8] == OSD_MODE_20V) {
             frame_type = OSD_MODE_20V;
         }
-    } else if (bytes_read == 9) {
+    } else if (bytes_read == 8) {
         frame_type = OSD_MODE_20V;
     } else {
         std::cerr << "Cannot obtain frame type" << std::endl;
@@ -150,12 +119,14 @@ bool SerialThread::measure_loop(std::string device) {
         double voltage_quanta;
         double current_quanta; // with 100mR shunt
 
-        bytes_read = port->ReadLine(line, 100, 1000);
+        if (TestDestroy()) return false;
+
+        bytes_read = port->ReadLine(line, 100, 250);
         if (bytes_read < 0) {
             std::cerr << "Read error or timeout" << std::endl;
             break;
         }
-        hexdump(line);
+        // hexdump(line);
 
         if (frame_type == OSD_MODE_28V) {
             voltage_quanta = 3.125;
@@ -166,34 +137,33 @@ bool SerialThread::measure_loop(std::string device) {
         }
         // printf("len=%d\n", static_cast<int>(strlen(serial_buffer)));
         if (strlen(line) < 8 || strlen(line) > 11) {
-            std::cerr << "String wrong length " << strlen(line) << std::endl;
             continue;
         }
         int shunt_voltage = hex4_to_uint16(line);
         // printf("Shunt: %d\n", shunt_voltage);
 
-        int bus_voltage = hex4_to_uint16(line + 4);
-
+        double bus_voltage = static_cast<double>(hex4_to_uint16(line + 4));
         // if (frame_type == OSD_MODE_20V && (bus_voltage & 0x0001)) {
         //     std::cerr << "bad data?" << std::endl;
         //     break;
         // }
 
         if (frame_type == OSD_MODE_20V)
-            bus_voltage = bus_voltage >> 3;
+            bus_voltage /= 8.0;
+
 
         int milliamps = abs((int) (static_cast<double>(shunt_voltage) * current_quanta));
-        int millivolts = (int) (static_cast<double>(bus_voltage) * voltage_quanta);
+        int millivolts = static_cast<int>(bus_voltage * voltage_quanta);
 
         MeasurementEvent *event;
-        if (millivolts < 1000) {
+        if (false && millivolts < 1000) {
             event = new MeasurementEvent(millivolts, 0);
         } else {
             event = new MeasurementEvent(millivolts, milliamps);
         }
         wxQueueEvent(this->m_frame, event);
-        wxThread::Sleep(50);
     }
+    wxQueueEvent(this->m_frame, new MeasurementEvent(0, 0));
     port->Close();
     return true;
 }
@@ -201,28 +171,20 @@ bool SerialThread::measure_loop(std::string device) {
 wxThread::ExitCode SerialThread::Entry() {
     updateStatus("Thread started");
 
-
     while (true) {
         auto enumerator = new SerialPortEnumerator();
         if (TestDestroy())
             return (ExitCode) 0;
 
-        wxLogDebug("Searching for serial devices...");
         updateStatus("Searching...");
-        p_mode = SEARCH;
-        if (p_mode == SEARCH) {
-            for (auto port: enumerator->GetPortNames()) {
-                std::cerr << "Trying" << port << std::endl;
-                updateStatus(wxString::Format("Trying %s",
-                                              std::filesystem::path(std::string(port.c_str())).filename().string()
-                ));
-                this->measure_loop(std::string(port.c_str()));
-            }
+        for (auto port: enumerator->GetPortNames()) {
+            updateStatus(wxString::Format("Trying %s",
+                                          std::filesystem::path(std::string(port.c_str())).filename().string()
+            ));
+            this->measure_loop(std::string(port.c_str()));
         }
         delete enumerator;
         updateStatus("...");
-        wxLogDebug("Serial device search complete.");
-
         wxThread::Sleep(5000); // Simulate long operation
     }
     return (wxThread::ExitCode) nullptr;

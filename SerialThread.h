@@ -2,7 +2,6 @@
 #define SERIALTHREAD_H
 
 #include <wx/thread.h>
-#include "SerialDriver.h"
 
 
 class SerialThread : public wxThread {
@@ -14,11 +13,9 @@ protected:
     ExitCode Entry() override;
 
 private:
-    void updateStatus(wxString status);
+    void updateStatus(const wxString &status);
 
-    int ReadLine(ceSerial *port, char *buffer, int size, int timeout);
-
-    bool measure_loop(std::string device);
+    bool measure_loop(const std::string &device);
 
 private:
     wxEvtHandler *m_frame;

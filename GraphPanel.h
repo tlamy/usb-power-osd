@@ -14,12 +14,14 @@ class GraphPanel : public wxPanel {
 public:
     GraphPanel(wxWindow *parent, wxSize size);
 
-    enum graph_style {
+    typedef enum {
         STYLE_BAR = false,
         STYLE_LINE = true,
-    };
+    } graph_style_t;
 
     void add(int current, PowerDelivery::PD_VOLTS voltage);
+
+    void SetGraphStyle(graph_style_t style);
 
 private:
     void OnPaint(wxPaintEvent &event);

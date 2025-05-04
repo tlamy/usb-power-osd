@@ -46,19 +46,38 @@ set(SRCS
         MeasurementEvent.h
 )
 if(APPLE)
-    # create bundle on apple compiles
+    # Create the app bundle
     add_executable(usbc-power-osd MACOSX_BUNDLE ${SRCS})
 
-    list(APPEND SRC_FILES ./wxmac.icns)
+    # Set the icon name (just the filename)
+    set(APP_ICON_NAME "usbpower.icns")
 
-    # Set a custom plist file for the app bundle - needed for Mac OS Retina display
+    # Set bundle properties
     set_target_properties(usbc-power-osd PROPERTIES
-            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
-            RESOURCE "./wxmac.icns"
-            MACOSX_BUNDLE_ICON_FILE wxmac.icns
-            MACOSX_BUNDLE_COPYRIGHT "Copyright MacWake.de"
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_BUNDLE_NAME "USB-C Power"
+            MACOSX_BUNDLE_EXECUTABLE_NAME "usbc-power-osd"
+            MACOSX_BUNDLE_ICON_FILE ${APP_ICON_NAME}
             MACOSX_BUNDLE_GUI_IDENTIFIER "de.macwake.usbosd"
+            MACOSX_BUNDLE_INFO_STRING "USB-C Power Monitor"
+            MACOSX_BUNDLE_COPYRIGHT "Copyright MacWake.de"
+            MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+            MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
+            # Specify our custom Info.plist template
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
     )
+
+    # Set the full path to the icon for the copy operation
+    set(APP_ICON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${APP_ICON_NAME}")
+
+    # Ensure the icon file is copied to Resources directory
+    target_sources(usbc-power-osd PRIVATE ${APP_ICON_PATH})
+    set_source_files_properties(${APP_ICON_PATH} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources")
+
+    # Add debugging message
+    message(STATUS "Configuring macOS bundle with icon: ${APP_ICON_NAME}")
+    message(STATUS "Using Info.plist template: ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in")
 else()
     # the WIN32 is needed for Windows in order for it to look for WinMain
     # instead of the main function. This is ignored on other systems,

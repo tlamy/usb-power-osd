@@ -4,8 +4,6 @@
 
 #include "Application.h"
 
-#include <wx/txtstrm.h>
-
 #include "Events.h"
 #include "OsdSettings.h"
 #include "GraphPanel.h"
@@ -18,17 +16,17 @@ public:
 };
 
 
-wxIMPLEMENT_APP(MyApp);
+wxIMPLEMENT_APP(MyApp); // NOLINT(*-pro-type-static-cast-downcast)
 
 
 bool MyApp::OnInit() {
     settings.init();
-    MyFrame *frame = new MyFrame("USB-C OSD", wxDefaultPosition, wxSize(400, 300));
+    auto frame = new MyFrame("USB-C OSD", wxDefaultPosition, wxSize(400, 250));
     frame->Show(true);
     return true;
 }
 
-MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) : wxFrame(
+MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) : wxFrame( // NOLINT(*-pro-type-member-init)
     nullptr, wxID_ANY, title, pos, size) {
 #ifdef __WXMAC__
     wxApp::s_macAboutMenuItemId = wxID_ABOUT;
@@ -40,8 +38,11 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
 #endif
 
     auto *viewMenu = new wxMenu;
-    viewMenu->Append(ALWAYSONTOP, wxT("&Always on top"), wxT("Keep window on top, even if app is in background"));
-    viewMenu->Append(LINEGRAPH, wxT("&Line Graph style"), wxT("Use line graph instead of bar graph"));
+    viewMenu->AppendCheckItem(ALWAYSONTOP, wxT("&Always on top"), wxT("Keep window on top, even if app is in background"));
+    viewMenu->AppendCheckItem(LINEGRAPH, wxT("&Line Graph style"), wxT("Use line graph instead of bar graph"));
+    viewMenu->Check(ALWAYSONTOP, settings.always_on_top);
+    viewMenu->Check(LINEGRAPH, m_graph_style == GraphPanel::STYLE_LINE);
+
     viewMenu->Append(wxID_EXIT, wxGetStockLabel(wxID_EXIT), wxT("Exit"));
     Bind(wxEVT_MENU, &MyFrame::Exit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MyFrame::ToggleLineGraph, this, LINEGRAPH);
@@ -49,60 +50,60 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     auto m_menuBar = new wxMenuBar;
     m_menuBar->Append(viewMenu, wxT("&File"));
 
-    SetMenuBar(m_menuBar);
+    wxFrameBase::SetMenuBar(m_menuBar);
 
     Bind(wxEVT_STATUS_UPDATE, &MyFrame::OnStatusUpdate, this);
     Bind(wxEVT_MEASUREMENT, &MyFrame::OnDataUpdate, this);
 
-    this->SetMaxSize(size);
-    this->SetMinSize(size);
+    this->wxTopLevelWindowBase::SetMaxSize(size);
+    this->wxTopLevelWindowBase::SetMinSize(size);
 
     // Create a panel to contain controls
-    wxPanel *panel = new wxPanel(this, wxID_ANY);
+    auto panel = new wxPanel(this, wxID_ANY);
     panel->SetBackgroundColour(wxColour(0, 0, 0));
     panel->SetForegroundColour(wxColour(255, 255, 255));
 
 
-    int fontSize = 36;
+    int fontSize = settings.amps_font_size;
     // Create a label (wxStaticText)
-    this->m_voltage = new wxStaticText(panel, wxID_ANY, "00.000V");
-
-    wxStaticText *label2 = new wxStaticText(panel, wxID_ANY, "0.000A");
+    this->m_voltage = new wxStaticText(panel, wxID_ANY, "---");
+    this->m_current = new wxStaticText(panel, wxID_ANY, "---");
 
     // (Optional) You can also set font or style:
     wxFont font(fontSize, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
-    this->m_voltage->SetFont(font);
-    label2->SetFont(font);
+    wxFont statusFont(20, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    font.SetFaceName(settings.volts_amps_font);
 
-    this->m_status_text = new wxStaticText(panel, wxID_ANY, "Status text", wxDefaultPosition,
+    this->m_voltage->SetFont(font);
+    this->m_current->SetFont(font);
+
+    this->m_status_text = new wxStaticText(panel, wxID_ANY, "Starting up", wxDefaultPosition,
                                            wxSize(size.x, wxDefaultCoord), wxALIGN_CENTER_HORIZONTAL);
-    this->m_status_text->SetFont(font);
+    this->m_status_text->SetFont(statusFont);
     m_graph_panel = new GraphPanel(panel, wxSize(size.x, 200));
-    m_graph_panel->SetBackgroundColour(wxColour("#000000"));
+    m_graph_panel->SetBackgroundColour(wxColour(0, 0, 0));
 
     // Create a main sizer for the panel
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     auto topRowSizer = new wxBoxSizer(wxHORIZONTAL);
 
     // Add the first label to the left with some proportion to expand
-    topRowSizer->Add(this->m_voltage, 0, wxALIGN_CENTER_VERTICAL | wxALL
-                     , 5);
+    topRowSizer->Add(this->m_voltage, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
     topRowSizer->AddStretchSpacer(1);
 
     // Add the second label to the right with no proportion (fixed size)
     // Use wxALIGN_RIGHT to align it to the right
-    topRowSizer->Add(label2, 0, wxALIGN_CENTER_VERTICAL | wxALL
-                     , 5);
+    topRowSizer->Add(this->m_current, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
     // Add the top row sizer to the main sizer
     mainSizer->Add(topRowSizer, 0, wxEXPAND);
 
-    mainSizer->Add(this->m_status_text);
+    mainSizer->Add(this->m_status_text, 0, wxEXPAND | wxALL, 5);
 
     // Add a stretch spacer to push everything to the top
-    mainSizer->AddStretchSpacer(1);
+    //mainSizer->AddStretchSpacer(1);
 
-    mainSizer->Add(m_graph_panel, 1, wxEXPAND | wxALL, 10);
+    mainSizer->Add(m_graph_panel, 1, wxEXPAND | wxALL, 5);
 
     // Set the sizer for the panel
     panel->SetSizer(mainSizer);
@@ -138,30 +139,54 @@ void MyFrame::ToggleOnTop(wxCommandEvent &event) {
     } else {
         this->SetWindowStyleFlag(this->GetWindowStyleFlag() & ~wxSTAY_ON_TOP);
     }
+    wxMenuItem* item = GetMenuBar()->FindItem(ALWAYSONTOP);
+    if (item) {
+        item->Check(settings.always_on_top);
+    }
 }
 
 void MyFrame::ToggleLineGraph(wxCommandEvent &event) {
-    //m_canvas->ToggleLineGraph();
+    this->m_graph_style = this->m_graph_style == GraphPanel::STYLE_BAR ? GraphPanel::STYLE_LINE : GraphPanel::STYLE_BAR;
+    this->m_graph_panel->SetGraphStyle(this->m_graph_style);
+    wxMenuItem* item = GetMenuBar()->FindItem(LINEGRAPH);
+    if (item) {
+        item->Check(m_graph_style == GraphPanel::STYLE_LINE);
+    }
 }
 
-void MyFrame::OnModeChange(wxCommandEvent &event) {
-    m_appmode = event.GetInt();
-}
-
-void MyFrame::OnStatusUpdate(wxThreadEvent &event) {
-    wxString status = event.GetString();
-    if (status.length() == 0) {
+void MyFrame::OnStatusUpdate(const wxThreadEvent &event) {
+    if (const wxString& status = event.GetString(); status.empty()) {
         this->m_status_text->Hide();
+        this->m_status_text->GetContainingSizer()->Show(this->m_status_text, false);
+        this->m_status_text->GetContainingSizer()->Layout();
+        this->Refresh();
     } else {
         this->m_status_text->SetLabel(status);
-        this->m_status_text->Show();
+        if (!this->m_show_status) {
+            this->m_status_text->Show();
+            this->m_status_text->GetContainingSizer()->Show(this->m_status_text, true);
+            this->m_status_text->GetContainingSizer()->Layout();
+            this->Refresh();
+        }
+        this->m_show_status = true;
     }
 }
 
 void MyFrame::OnDataUpdate(wxThreadEvent &event) {
-    MeasurementEvent* theEvent = static_cast<MeasurementEvent *>(&event);
+    auto theEvent = dynamic_cast<MeasurementEvent *>(&event);
 
-    this->m_graph_panel->add(theEvent->GetMilliAmps(), PowerDelivery::getEnum(theEvent->GetMilliVolts()));
+    if (this->m_show_status) {
+        this->m_status_text->Hide();
+        this->m_status_text->GetContainingSizer()->Show(this->m_status_text, false);
+        this->m_status_text->GetContainingSizer()->Layout();
+        this->Refresh();
+    }
+    auto voltage = PowerDelivery::getEnum(theEvent->GetMilliVolts());
+    this->m_graph_panel->add(theEvent->GetMilliAmps(), voltage);
+    wxString voltage_str = wxString::Format("%0.3fV", theEvent->GetMilliVolts() / 1000.0);
+    wxString amp_str = wxString::Format("%0.3fA", theEvent->GetMilliAmps() / 1000.0);
+    this->m_voltage->SetLabel(voltage_str);
+    this->m_current->SetLabel(amp_str);
 }
 
 void MyFrame::About(wxCommandEvent &) {
