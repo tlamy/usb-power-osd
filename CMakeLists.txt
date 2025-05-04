@@ -5,6 +5,8 @@ project(usb_meter_osd LANGUAGES CXX)
 if(APPLE)
     # Setzen Sie dies direkt nach dem project() Befehl
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
+    # Needed for gettimeofday() on some macOS versions
+    add_definitions(-D_DARWIN_C_SOURCE)
 endif()
 
 include(FetchContent)
