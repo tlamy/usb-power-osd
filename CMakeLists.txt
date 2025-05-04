@@ -21,6 +21,7 @@ set(wxUSE_WEBVIEW OFF)
 set(wxUSE_REGEX OFF)
 set(wxUSE_EXPAT OFF)
 set(wxUSE_LIBTIFF OFF)
+set(wxUSE_STC OFF)
 
 message(STATUS "Fetching wxWidgets...")
 

@@ -26,6 +26,13 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <cstdint>
+#ifdef __APPLE__
+#include <sys/time.h>
+#elif defined(__linux__)
+#include <sys/time.h>
+#endif
+
 #ifdef CE_LINUX
 	#include <linux/serial.h>
 #endif
