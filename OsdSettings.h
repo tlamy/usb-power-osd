@@ -31,7 +31,7 @@ public:
 
     void init();
 
-    static std::string rgbToStyle(wxColour rgb);
+    static std::string rgbToStyle(const wxColour &rgb);
 
     std::string ampsStylesheet() const;
 
@@ -48,7 +48,7 @@ public:
 private:
     wxColour setting2Rgb(const wxString &setting);
 
-    wxString rgb_to_string(wxColour rgb);
+    wxString rgb_to_string(const wxColour &rgb);
 
     wxLogStderr *m_log = new wxLogStderr;
 };

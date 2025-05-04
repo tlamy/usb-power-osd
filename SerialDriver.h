@@ -13,10 +13,6 @@
 #ifndef CESERIAL_H
 #define CESERIAL_H
 #include <string>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <cstdint>
 
 #if defined(_WIN64) || defined(__WIN32__) || defined(_WIN32) || defined(WIN32) || defined(__WINDOWS__) || defined(__TOS_WIN__) || defined(__CYGWIN__)
 #ifndef CE_WINDOWS

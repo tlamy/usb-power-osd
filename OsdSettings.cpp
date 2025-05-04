@@ -20,7 +20,7 @@ void OsdSettings::init() {
     volts_font_size = 42;
     amps_font_size = 42;
     graph_height = 150;
-    color_bg = wxColour("#000000");
+    color_bg = wxColour(0,0,0);
     color_amps = wxColour(0xff, 0xff, 0xff);
     color_none = wxColour(0xee, 0xee, 0xee);
     color_5v = wxColour(0x00, 0xff, 0x00);
@@ -31,10 +31,10 @@ void OsdSettings::init() {
     color_36v = wxColour(0x00, 0xff, 0xff);
     color_48v = wxColour(0x00, 0x00, 0xff);
 
-    loadSettings();
+    //loadSettings();
 }
 
-std::string OsdSettings::rgbToStyle(wxColour rgb) {
+std::string OsdSettings::rgbToStyle(const wxColour &rgb) {
     char style[64];
     std::snprintf(style, 64, "color: rgb(%u, %u, %u);", rgb.Red(), rgb.Green(), rgb.Blue());
     return style;
@@ -49,7 +49,7 @@ std::string OsdSettings::voltsStylesheet(PowerDelivery::PD_VOLTS volts) const {
 }
 
 wxColour OsdSettings::voltsRgb(PowerDelivery::PD_VOLTS volts) const {
-    wxColour color = wxColour(0xff, 0x33, 0x99);
+    auto color = wxColour(0xff, 0x33, 0x99);
     switch (volts) {
         case PowerDelivery::PD_NONE:
             color = (color_none);
@@ -174,7 +174,7 @@ wxColour OsdSettings::setting2Rgb(const wxString &setting) {
     return wxColour(wxAtoi(tokens.Item(0)), wxAtoi(tokens.Item(1)), wxAtoi(tokens.Item(2)));
 }
 
-wxString OsdSettings::rgb_to_string(wxColour rgb) {
+wxString OsdSettings::rgb_to_string(const wxColour &rgb) {
     wxString result;
     result.Printf("%1,%2,%3", rgb.Red(), rgb.Green(), rgb.Blue());
     return result;

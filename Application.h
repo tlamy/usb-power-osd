@@ -26,16 +26,14 @@ public:
 
     void ToggleLineGraph(wxCommandEvent &event);
 
-    void OnModeChange(wxCommandEvent &event);
-
-    void OnStatusUpdate(wxThreadEvent &event);
+    void OnStatusUpdate(const wxThreadEvent &event);
 
     void OnDataUpdate(wxThreadEvent &event);
 
 private:
     wxFont *m_volts_font;
     wxFont *m_amps_font;
-    bool m_graph_style = STYLE_BAR;
+    GraphPanel::graph_style_t m_graph_style = GraphPanel::STYLE_BAR;
     bool m_alwaysontop = false;
     wxStaticText *m_status_text;
     wxStaticText *m_voltage;
@@ -47,17 +45,9 @@ private:
         LINEGRAPH,
     };
 
-    enum graph_style {
-        STYLE_BAR = false,
-        STYLE_LINE = true,
-    };
-
     SerialThread *serial_thread;
-
-
     wxMenuBar *m_menuBar;
-    //AmpmeterCanvas* m_canvas;
-    int m_appmode;
+    bool m_show_status = true;
 };
 
 
