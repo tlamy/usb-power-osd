@@ -5,7 +5,7 @@ project(usb_meter_osd LANGUAGES CXX)
 include(ProcessorCount)
 ProcessorCount(N)
 if(NOT N EQUAL 0)
-    set(CMAKE_BUILD_PARALLEL_LEVEL 2) # Limit parallel builds on github actions
+    set(CMAKE_BUILD_PARALLEL_LEVEL ${N})
 endif()
 
 if(APPLE)
@@ -21,8 +21,21 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
+# Basic build options
 set(wxBUILD_SHARED OFF)
+set(wxBUILD_PRECOMP OFF)
+set(wxBUILD_SAMPLES OFF)
+set(wxBUILD_TESTS OFF)
+set(wxBUILD_DEMOS OFF)
+set(wxBUILD_INSTALL OFF)
+
+# Required features
+set(wxUSE_GUI ON)
+set(wxUSE_UNICODE ON)
+set(wxUSE_DATAVIEWCTRL ON)  # Required for wxTreeListCtrl
+set(wxUSE_TREELISTCTRL ON)
+
+# Disabled features
 set(wxUSE_WEBVIEW OFF)
 set(wxUSE_REGEX OFF)
 set(wxUSE_EXPAT OFF)
@@ -30,18 +43,25 @@ set(wxUSE_LIBTIFF OFF)
 set(wxUSE_STC OFF)
 set(wxUSE_RIBBON OFF)
 set(wxUSE_RICHTEXT OFF)
-set(wxUSE_RICHTEXT_XML_HANDLER OFF)
 set(wxUSE_HTML OFF)
 set(wxUSE_MEDIACTRL OFF)
 set(wxUSE_PROPGRID OFF)
-
+set(wxUSE_GRID OFF)
+set(wxUSE_WEBSOCKET OFF)
+set(wxUSE_GLCANVAS OFF)
+set(wxUSE_SOUND OFF)
+set(wxUSE_XRC OFF)
+set(wxUSE_XML OFF)
+set(wxUSE_PRINTING_ARCHITECTURE OFF)
+set(wxUSE_HELP OFF)
+set(wxUSE_WXHTML_HELP OFF)
+set(wxUSE_HELPHTML OFF)
 message(STATUS "Fetching wxWidgets...")
 
 FetchContent_Declare(
         wxWidgets
         GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
-        GIT_SHALLOW ON
-)
+        GIT_SHALLOW ON)
 FetchContent_MakeAvailable(wxWidgets)
 set(EXECUTABLE_NAME "USB-C Power")
 
