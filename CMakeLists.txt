@@ -5,7 +5,7 @@ project(usb_meter_osd LANGUAGES CXX)
 include(ProcessorCount)
 ProcessorCount(N)
 if(NOT N EQUAL 0)
-    set(CMAKE_BUILD_PARALLEL_LEVEL ${N})
+    set(CMAKE_BUILD_PARALLEL_LEVEL 2) # Limit parallel builds on github actions
 endif()
 
 if(APPLE)
@@ -29,6 +29,11 @@ set(wxUSE_EXPAT OFF)
 set(wxUSE_LIBTIFF OFF)
 set(wxUSE_STC OFF)
 set(wxUSE_RIBBON OFF)
+set(wxUSE_RICHTEXT OFF)
+set(wxUSE_RICHTEXT_XML_HANDLER OFF)
+set(wxUSE_HTML OFF)
+set(wxUSE_MEDIACTRL OFF)
+set(wxUSE_PROPGRID OFF)
 
 message(STATUS "Fetching wxWidgets...")
 
