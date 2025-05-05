@@ -10,20 +10,17 @@ on:
 jobs:
   build:
     name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.runs-on || matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-cross ]
+        os: [ ubuntu-22.04, macos-latest, windows-latest ]
         build_type: [ Release ]
         include:
           - os: ubuntu-22.04
             generator: "Unix Makefiles"
           - os: macos-latest
             generator: "Unix Makefiles"
-          - os: windows-cross
-            generator: "Unix Makefiles"
-            runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -48,26 +45,21 @@ jobs:
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ github.run_id }}
 
-      - name: Install MinGW and dependencies
-        if: matrix.os == 'windows-cross'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mingw-w64 cmake zip
+      - name: Setup MinGW for Windows
+        if: matrix.os == 'windows-latest'
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
 
-      - name: Configure CMake for Windows
-        if: matrix.os == 'windows-cross'
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
-          cmake -B ${{github.workspace}}/build \
-          -G "Unix Makefiles" \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_SYSTEM_NAME=Windows \
-          -DCMAKE_CROSSCOMPILING=TRUE \
-          -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
-          -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
-          -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+          cmake -B ${{github.workspace}}/build `
+          -G "MinGW Makefiles" `
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
       - name: Configure CMake (Non-Windows)
-        if: matrix.os != 'windows-cross'
+        if: matrix.os != 'windows-latest'
         run: >
           cmake -B ${{github.workspace}}/build 
           -G "${{matrix.generator}}" 
@@ -82,11 +74,9 @@ jobs:
       - name: Sign the macOS application
         if: matrix.os == 'macos-latest'
         env:
-          CERT_NAME: "Developer ID Application: ${{ vars.APPLE_SIGNING_ID }}"
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          export XX="#$CERT_NAME#"
-          echo "Using cert name: $XX"
-          /usr/bin/codesign --force --options runtime --sign "$CERT_NAME" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
+          /usr/bin/codesign --force --options runtime --sign "Developer ID Application: $TEAM_ID" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
 
       # macOS notarization (optional but recommended)
       - name: Notarize the macOS application
@@ -94,6 +84,7 @@ jobs:
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           # Create a ZIP archive of the app
           ditto -c -k --keepParent "${{github.workspace}}/build/usbc-power-osd.app" "${{github.workspace}}/build/usbc-power-osd.zip"
@@ -102,18 +93,18 @@ jobs:
           xcrun notarytool submit "${{github.workspace}}/build/usbc-power-osd.zip" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PASSWORD" \
-            --team-id "${{vars.APPLE_TEAM_ID}}" \
+            --team-id "$TEAM_ID" \
             --wait
           
           # Staple the notarization ticket
           xcrun stapler staple "${{github.workspace}}/build/usbc-power-osd.app"
 
       - name: Upload Windows artifacts
-        if: matrix.os == 'windows-cross'
+        if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: ${{github.workspace}}/build/usbc-power-osd.exe
+          path: ${{github.workspace}}/build/Release/usbc-power-osd.exe
           if-no-files-found: error
 
       - name: Upload macOS artifacts
