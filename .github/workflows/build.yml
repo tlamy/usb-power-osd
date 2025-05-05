@@ -39,13 +39,6 @@ jobs:
       # macOS code signing setup
       - name: Import Code-Signing Certificates
         if: matrix.os == 'macos-latest'
-        env:
-          CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
-        run: |
-          echo $xCERTIFICATE_P12 | tr ' ' '\n' > cert.p12
-
-      - name: Import Code-Signing Certificates
-        if: matrix.os == 'macos-latest'
         uses: Apple-Actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
@@ -77,21 +70,13 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
 
-#      # macOS code signing
-#      - name: Sign the macOS application
-#        if: matrix.os == 'macos-latest'
-#        env:
-#          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-#        run: |
-#          /usr/bin/codesign --force --options runtime --sign "Developer ID Application: $TEAM_ID" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
-
-      - name: Sign a Mach-O binary
+      # macOS code signing
+      - name: Sign the macOS application
         if: matrix.os == 'macos-latest'
-        uses: indygreg/apple-code-sign-action@v1
-        with:
-          input_path: "${{github.workspace}}/build/usbc-power-osd.app"
-          p12_file: cert.p12
-          p12_password: ${{ secrets.certificate_password }}
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          /usr/bin/codesign --force --options runtime --sign "Developer ID Application: $TEAM_ID" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
 
       # macOS notarization (optional but recommended)
       - name: Notarize the macOS application
