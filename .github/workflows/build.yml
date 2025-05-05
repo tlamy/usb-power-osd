@@ -17,9 +17,7 @@ jobs:
         os: [ ubuntu-22.04, macos-latest, windows-latest ]
         build_type: [ Release ]
         include:
-          - os: windows-latest
-            generator: "Visual Studio 17 2022"
-          - os: ubuntu-22.04  # Make sure to update this to match
+          - os: ubuntu-22.04
             generator: "Unix Makefiles"
           - os: macos-latest
             generator: "Unix Makefiles"
@@ -47,7 +45,21 @@ jobs:
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ github.run_id }}
 
-      - name: Configure CMake
+      - name: Setup MinGW for Windows
+        if: matrix.os == 'windows-latest'
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cmake -B ${{github.workspace}}/build `
+          -G "MinGW Makefiles" `
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+      - name: Configure CMake (Non-Windows)
+        if: matrix.os != 'windows-latest'
         run: >
           cmake -B ${{github.workspace}}/build 
           -G "${{matrix.generator}}" 
