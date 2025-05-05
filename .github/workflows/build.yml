@@ -56,7 +56,7 @@ jobs:
           ${{ matrix.os == 'macos-latest' && '-DCMAKE_CXX_FLAGS=-D_DARWIN_C_SOURCE' || '' }}
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
 
       # macOS code signing
       - name: Sign the macOS application
