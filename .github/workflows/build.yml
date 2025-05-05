@@ -76,9 +76,10 @@ jobs:
         if: matrix.os == 'macos-latest'
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CERT_NAME: "Developer ID Application: ${{ secrets.APPLE_TEAM_ID }}"
         run: |
-          echo "Team ID: '$TEAM_ID'"
-          /usr/bin/codesign --force --options runtime --sign "Developer ID Application: $TEAM_ID" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
+          echo "Using cert name: '$CERT_NAME'"
+          /usr/bin/codesign --force --options runtime --sign "$CERT_NAME" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
 
       # macOS notarization (optional but recommended)
       - name: Notarize the macOS application
