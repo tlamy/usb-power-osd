@@ -77,6 +77,7 @@ jobs:
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          echo "Team ID: '$TEAM_ID'"
           /usr/bin/codesign --force --options runtime --sign "Developer ID Application: $TEAM_ID" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
 
       # macOS notarization (optional but recommended)
