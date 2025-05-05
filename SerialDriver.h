@@ -32,6 +32,11 @@
 	#include <windows.h>
 #endif
 
+#ifdef CE_LINUX
+#include <inttypes.h>
+#include <memory.h>
+#endif
+
 class ceSerial {
 private:
 	char rxchar;
