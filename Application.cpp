@@ -68,14 +68,20 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     // Create a label (wxStaticText)
     this->m_voltage = new wxStaticText(panel, wxID_ANY, "---");
     this->m_current = new wxStaticText(panel, wxID_ANY, "---");
+    this->m_watts = new wxStaticText(panel, wxID_ANY, "");
+    this->m_current_minmax = new wxStaticText(panel, wxID_ANY, "<");
 
     // (Optional) You can also set font or style:
     wxFont font(fontSize, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
     wxFont statusFont(20, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    wxFont minMaxFont(18, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     font.SetFaceName(settings.volts_amps_font);
+    minMaxFont.SetFaceName(settings.volts_amps_font);
 
     this->m_voltage->SetFont(font);
     this->m_current->SetFont(font);
+    this->m_current_minmax->SetFont(minMaxFont);
+    this->m_watts->SetFont(minMaxFont);
 
     this->m_status_text = new wxStaticText(panel, wxID_ANY, "Starting up", wxDefaultPosition,
                                            wxSize(size.x, wxDefaultCoord), wxALIGN_CENTER_HORIZONTAL);
@@ -86,6 +92,7 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     // Create a main sizer for the panel
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     auto topRowSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto minMaxRowSizer = new wxBoxSizer(wxHORIZONTAL);
 
     // Add the first label to the left with some proportion to expand
     topRowSizer->Add(this->m_voltage, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
@@ -97,6 +104,12 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
 
     // Add the top row sizer to the main sizer
     mainSizer->Add(topRowSizer, 0, wxEXPAND);
+
+    minMaxRowSizer->Add(this->m_watts, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    minMaxRowSizer->AddStretchSpacer(1);
+    minMaxRowSizer->Add(this->m_current_minmax, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    mainSizer->Add(minMaxRowSizer, 0, wxEXPAND | wxALL);
 
     mainSizer->Add(this->m_status_text, 0, wxEXPAND | wxALL, 5);
 
@@ -181,12 +194,17 @@ void MyFrame::OnDataUpdate(wxThreadEvent &event) {
         this->m_status_text->GetContainingSizer()->Layout();
         this->Refresh();
     }
+    this->m_watts->SetLabel(wxString::Format("%0.3fW", theEvent->GetMilliVolts()*theEvent->GetMilliAmps() / 1000000.0));
     auto voltage = PowerDelivery::getEnum(theEvent->GetMilliVolts());
     this->m_graph_panel->add(theEvent->GetMilliAmps(), voltage);
-    wxString voltage_str = wxString::Format("%0.3fV", theEvent->GetMilliVolts() / 1000.0);
+    wxString voltage_str = wxString::Format("%0dV", PowerDelivery::getVoltage(voltage));
     wxString amp_str = wxString::Format("%0.3fA", theEvent->GetMilliAmps() / 1000.0);
     this->m_voltage->SetLabel(voltage_str);
     this->m_current->SetLabel(amp_str);
+    int minCurrent, maxCurrent;
+    this->m_graph_panel->GetMinMaxCurrent(&minCurrent, &maxCurrent);
+    const wxString min_str = wxString::Format("%0.3fA < %0.3fA", minCurrent / 1000.0, maxCurrent / 1000.0);
+    this->m_current_minmax->SetLabel(min_str);
 }
 
 void MyFrame::About(wxCommandEvent &) {

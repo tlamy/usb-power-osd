@@ -23,6 +23,8 @@ public:
 
     void SetGraphStyle(graph_style_t style);
 
+    void GetMinMaxCurrent(int *min, int *max) const;
+
 private:
     void OnPaint(wxPaintEvent &event);
 
@@ -31,6 +33,8 @@ private:
     std::deque<PowerDelivery::PD_VOLTS> m_voltages;
     int m_maxBarValue;
     int m_size;
+    int m_current_min = 0;
+    int m_current_max = 0;
 };
 
 

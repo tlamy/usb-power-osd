@@ -38,6 +38,8 @@ private:
     wxStaticText *m_status_text;
     wxStaticText *m_voltage;
     wxStaticText *m_current;
+    wxStaticText *m_current_minmax;
+    wxStaticText *m_watts;
     GraphPanel *m_graph_panel;
 
     enum MenuCommands {

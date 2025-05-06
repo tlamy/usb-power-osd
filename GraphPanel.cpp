@@ -33,6 +33,15 @@ void GraphPanel::add(int current, PowerDelivery::PD_VOLTS voltage) {
     this->m_voltages.push_back(voltage);
 
     this->m_maxBarValue = *std::ranges::max_element(this->m_currents);
+    this->m_current_max = *std::ranges::max_element(this->m_currents);
+
+auto it = std::ranges::min_element(
+    this->m_currents,
+    std::less<>(),
+    [](const int value) { return value != 0; }
+);
+
+this->m_current_min = (it != this->m_currents.end()) ? *it : 0;
 
     if (IsShown()) {
         Refresh(false);
@@ -45,6 +54,11 @@ void GraphPanel::SetGraphStyle(graph_style_t style) {
     if (IsShown()) {
         Refresh(false);
     }
+}
+
+void GraphPanel::GetMinMaxCurrent(int *min, int *max) const {
+    *min = this->m_current_min;
+    *max = this->m_current_max;
 }
 
 void GraphPanel::OnPaint(wxPaintEvent &event) {
