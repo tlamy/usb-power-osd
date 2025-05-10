@@ -16,9 +16,14 @@ if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 endif()
 
+# Add X11 dependency for Linux
+if(UNIX AND NOT APPLE)
+    find_package(X11 REQUIRED)
+endif()
+
 include(FetchContent)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Basic build options
@@ -84,6 +89,7 @@ set(SRCS
         MeasurementEvent.cpp
         MeasurementEvent.h
 )
+
 if(APPLE)
     # Create the app bundle
     add_executable(usbc-power-osd MACOSX_BUNDLE ${SRCS})
@@ -124,4 +130,9 @@ else()
     add_executable(usbc-power-osd WIN32 ${SRCS} usbc-power-osd.exe.manifest)
 endif()
 
-target_link_libraries(usbc-power-osd PRIVATE wxcore wxnet)
+# Platform-specific linking
+if(UNIX AND NOT APPLE)
+    target_link_libraries(usbc-power-osd PRIVATE wxcore wxnet X11::X11)
+else()
+    target_link_libraries(usbc-power-osd PRIVATE wxcore wxnet)
+endif()
