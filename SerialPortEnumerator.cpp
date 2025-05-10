@@ -42,7 +42,7 @@ std::vector<wxString> SerialPortEnumerator::GetPortNames() {
 #ifdef __WXMAC__
     wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("tty.usbserial*"), wxDIR_FILES);
 #else
-    wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("ttyS*"), wxDIR_FILES);
+    wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("ttyUSB*"), wxDIR_FILES);
 #endif
     for (wxArrayString::const_iterator it = arrStrFiles.begin(); it != arrStrFiles.end(); ++it)
         vStrPortNames.push_back(*it);

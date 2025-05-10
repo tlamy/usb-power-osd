@@ -31,10 +31,12 @@ private:
     bool m_graph_style = STYLE_BAR;
     std::deque<int> m_currents;
     std::deque<PowerDelivery::PD_VOLTS> m_voltages;
-    int m_maxBarValue;
+    int m_maxBarValue = 1;
     int m_size;
     int m_current_min = 0;
     int m_current_max = 0;
+    static int max(const std::deque<int>& deque);
+
 };
 
 

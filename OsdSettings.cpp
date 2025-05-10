@@ -16,9 +16,17 @@ void OsdSettings::init() {
     always_on_top = false;
     window_height = 200;
     window_width = 400;
-    volts_amps_font = "Monaco";
     volts_font_size = 42;
     amps_font_size = 42;
+#if WX_PLATFORM_MACOS
+    volts_amps_font = "Monaco";
+#elif WX_PLATFORM_WINDOWS
+    volts_amps_font = "Arial";
+#else
+    volts_amps_font = "Roboto Mono";
+    volts_font_size = 36;
+    amps_font_size = 36;
+#endif
     graph_height = 150;
     color_bg = wxColour(0,0,0);
     color_amps = wxColour(0xff, 0xff, 0xff);
