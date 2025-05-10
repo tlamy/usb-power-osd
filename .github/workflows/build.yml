@@ -17,9 +17,7 @@ jobs:
         os: [ ubuntu-22.04, macos-latest, windows-latest ]
         build_type: [ Release ]
         include:
-          - os: windows-latest
-            generator: "Visual Studio 17 2022"
-          - os: ubuntu-22.04  # Make sure to update this to match
+          - os: ubuntu-22.04
             generator: "Unix Makefiles"
           - os: macos-latest
             generator: "Unix Makefiles"
@@ -44,12 +42,28 @@ jobs:
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ github.run_id }}
 
-      - name: Configure CMake
+      - name: Setup MinGW for Windows
+        if: matrix.os == 'windows-latest'
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+          version: 12.2.0  # Specify a specific version
+
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cmake -B ${{github.workspace}}/build `
+          -G "MinGW Makefiles" `
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+      - name: Configure CMake (Non-Windows)
+        if: matrix.os != 'windows-latest'
         run: >
           cmake -B ${{github.workspace}}/build 
           -G "${{matrix.generator}}" 
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          ${{ matrix.os == 'macos-latest' && '-DCMAKE_CXX_FLAGS=-D_DARWIN_C_SOURCE' || '' }}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
@@ -58,9 +72,12 @@ jobs:
       - name: Sign the macOS application
         if: matrix.os == 'macos-latest'
         env:
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          TEAM_ID: ${{ secrets.APPLE_CERTIFICATE_NAME }}
+          CERT_NAME: "Developer ID Application: ${{ secrets.APPLE_CERTIFICATE_NAME }}"
         run: |
-          /usr/bin/codesign --force --options runtime --sign "Developer ID Application: $TEAM_ID" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
+          export XX="#$CERT_NAME#"
+          echo "Using cert name: $XX"
+          /usr/bin/codesign --force --options runtime --sign "$CERT_NAME" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
 
       # macOS notarization (optional but recommended)
       - name: Notarize the macOS application
