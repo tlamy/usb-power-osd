@@ -72,7 +72,7 @@ jobs:
       - name: Sign the macOS application
         if: matrix.os == 'macos-latest'
         env:
-          CERT_NAME: "Developer ID Application: ${{ env.APPLE_SIGNING_ID }}"
+          CERT_NAME: "Developer ID Application: ${{ vars.APPLE_SIGNING_ID }}"
         run: |
           export XX="#$CERT_NAME#"
           echo "Using cert name: $XX"
@@ -92,7 +92,7 @@ jobs:
           xcrun notarytool submit "${{github.workspace}}/build/usbc-power-osd.zip" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PASSWORD" \
-            --team-id "${{env.APPLE_TEAM_ID}}" \
+            --team-id "${{vars.APPLE_TEAM_ID}}" \
             --wait
           
           # Staple the notarization ticket
