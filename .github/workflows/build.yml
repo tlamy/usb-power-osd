@@ -72,8 +72,7 @@ jobs:
       - name: Sign the macOS application
         if: matrix.os == 'macos-latest'
         env:
-          TEAM_ID: ${{ secrets.APPLE_CERTIFICATE_NAME }}
-          CERT_NAME: "Developer ID Application: ${{ secrets.APPLE_CERTIFICATE_NAME }}"
+          CERT_NAME: "Developer ID Application: ${{ env.APPLE_SIGNING_ID }}"
         run: |
           export XX="#$CERT_NAME#"
           echo "Using cert name: $XX"
@@ -85,7 +84,6 @@ jobs:
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           # Create a ZIP archive of the app
           ditto -c -k --keepParent "${{github.workspace}}/build/usbc-power-osd.app" "${{github.workspace}}/build/usbc-power-osd.zip"
@@ -94,7 +92,7 @@ jobs:
           xcrun notarytool submit "${{github.workspace}}/build/usbc-power-osd.zip" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PASSWORD" \
-            --team-id "$TEAM_ID" \
+            --team-id "${{APPLE_TEAM_ID}}" \
             --wait
           
           # Staple the notarization ticket
