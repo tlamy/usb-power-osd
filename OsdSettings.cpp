@@ -4,7 +4,6 @@
 #include <wx/fileconf.h>
 #include <wx/colour.h>
 #include <string>
-#include <format>
 #include <sstream>
 #include <wx/log.h>
 #include <wx/string.h>
@@ -40,20 +39,6 @@ void OsdSettings::init() {
     color_48v = wxColour(0x00, 0x00, 0xff);
 
     //loadSettings();
-}
-
-std::string OsdSettings::rgbToStyle(const wxColour &rgb) {
-    char style[64];
-    std::snprintf(style, 64, "color: rgb(%u, %u, %u);", rgb.Red(), rgb.Green(), rgb.Blue());
-    return style;
-}
-
-std::string OsdSettings::ampsStylesheet() const {
-    return rgbToStyle(color_amps);
-}
-
-std::string OsdSettings::voltsStylesheet(PowerDelivery::PD_VOLTS volts) const {
-    return rgbToStyle(voltsRgb(volts));
 }
 
 wxColour OsdSettings::voltsRgb(PowerDelivery::PD_VOLTS volts) const {

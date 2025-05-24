@@ -31,10 +31,6 @@ public:
 
     void init();
 
-    static std::string rgbToStyle(const wxColour &rgb);
-
-    std::string ampsStylesheet() const;
-
     wxColour voltsRgb(PowerDelivery::PD_VOLTS volts) const;
 
     std::string voltsStylesheet(PowerDelivery::PD_VOLTS volts) const;
