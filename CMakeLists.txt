@@ -41,6 +41,7 @@ set(wxUSE_DATAVIEWCTRL ON)  # Required for wxTreeListCtrl
 set(wxUSE_TREELISTCTRL ON)
 
 # Disabled features
+set(wxUSE_LIBWEBP OFF)
 set(wxUSE_WEBVIEW OFF)
 set(wxUSE_REGEX OFF)
 set(wxUSE_EXPAT OFF)
