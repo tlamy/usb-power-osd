@@ -92,7 +92,7 @@ jobs:
           xcrun notarytool submit "${{github.workspace}}/build/usbc-power-osd.zip" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PASSWORD" \
-            --team-id "${{APPLE_TEAM_ID}}" \
+            --team-id "${{env.APPLE_TEAM_ID}}" \
             --wait
           
           # Staple the notarization ticket
