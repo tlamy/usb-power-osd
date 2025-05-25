@@ -16,6 +16,7 @@
 #include <functional>
 
 #ifdef __WXMSW__
+#include <wx/buffer.h>
 #include <wx/msw/registry.h>
 #endif // __WXMSW__
 
@@ -125,6 +126,7 @@ float ceSerial::GetStopBits() {
 
 
 #ifdef CE_WINDOWS
+#include <wx/string.h>
 
 void ceSerial::SetBaudRate(long baudrate) {
 	stdbaud = true;
