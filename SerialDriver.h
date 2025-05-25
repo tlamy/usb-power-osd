@@ -30,7 +30,8 @@
 #endif
 
 #ifdef CE_WINDOWS
-	#include <windows.h>
+#include <windows.h>
+#include <cstdint>
 #endif
 
 #ifdef CE_LINUX

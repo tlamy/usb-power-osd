@@ -19,6 +19,7 @@
 #include <wx/buffer.h>
 #include <wx/string.h>
 #include <wx/msw/registry.h>
+#include <cstdint>
 #endif // __WXMSW__
 
 #ifdef CE_WINDOWS
