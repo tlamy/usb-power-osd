@@ -17,6 +17,7 @@
 
 #ifdef __WXMSW__
 #include <wx/buffer.h>
+#include <wx/string.h>
 #include <wx/msw/registry.h>
 #endif // __WXMSW__
 
