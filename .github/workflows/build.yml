@@ -9,27 +9,26 @@ on:
 
 jobs:
   build:
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest ]  # Remove windows-latest
+        os: [ ubuntu-22.04, macos-latest, windows-cross ]
         build_type: [ Release ]
         include:
           - os: ubuntu-22.04
             generator: "Unix Makefiles"
           - os: macos-latest
             generator: "Unix Makefiles"
+          - os: windows-cross
+            generator: "Unix Makefiles"
+            run-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev
 
       # macOS code signing setup
       - name: Import Code-Signing Certificates
@@ -40,44 +39,32 @@ jobs:
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ github.run_id }}
 
-      - name: Install MinGW for Windows cross-compilation
-        if: matrix.os == 'ubuntu-22.04'
+      - name: Install MinGW and dependencies
+        if: matrix.os == 'windows-cross'
         run: |
           sudo apt-get update
-          sudo apt-get install -y mingw-w64 
+          sudo apt-get install -y mingw-w64 cmake zip
 
-      - name: Configure CMake (Linux native)
-        if: matrix.os == 'ubuntu-22.04'
+      - name: Configure CMake for Windows
         run: |
-          # Native Linux build
-          cmake -B ${{github.workspace}}/build-linux \
-            -G "Unix Makefiles" \
-            -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-          
-          # Windows cross-compilation
-          cmake -B ${{github.workspace}}/build-windows \
-            -G "Unix Makefiles" \
-            -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
-            -DCMAKE_SYSTEM_NAME=Windows \
-            -DCMAKE_CROSSCOMPILING=TRUE \
-            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
-            -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
-            -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres
+          cmake -B ${{github.workspace}}/build \
+          -G "Unix Makefiles" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_SYSTEM_NAME=Windows \
+          -DCMAKE_CROSSCOMPILING=TRUE \
+          -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+          -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+          -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+          -DCMAKE_PREFIX_PATH=${{env.Qt6_DIR}}
 
       - name: Configure CMake (Non-Windows)
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-cross'
         run: >
           cmake -B ${{github.workspace}}/build 
           -G "${{matrix.generator}}" 
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
           ${{ matrix.os == 'macos-latest' && '-DCMAKE_CXX_FLAGS=-D_DARWIN_C_SOURCE' || '' }}
-
-      - name: Build (Linux native and Windows)
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          cmake --build ${{github.workspace}}/build-linux --config ${{matrix.build_type}}
-          cmake --build ${{github.workspace}}/build-windows --config ${{matrix.build_type}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
@@ -112,19 +99,26 @@ jobs:
           # Staple the notarization ticket
           xcrun stapler staple "${{github.workspace}}/build/usbc-power-osd.app"
 
-      - name: Create Windows package
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          7z a -tzip "${{github.workspace}}/build-windows/Owon1041-${{ steps.get_version.outputs.VERSION }}-Windows.zip" \
-            "${{github.workspace}}/build-windows/usbc-power-osd.exe"
-
-      # Update the artifacts upload accordingly
-      - name: Upload release artifacts
+      - name: Upload Windows artifacts
+        if: matrix.os == 'windows-cross'
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts-${{ matrix.os }}
-          path: |
-            ${{ matrix.os == 'macos-latest' && github.workspace }}/build/*.dmg
-            ${{ matrix.os == 'ubuntu-22.04' && github.workspace }}/build-linux/*.tar.gz
-            ${{ matrix.os == 'ubuntu-22.04' && github.workspace }}/build-windows/*.zip
+          name: windows-build
+          path: ${{github.workspace}}/build/Release/usbc-power-osd.exe
+          if-no-files-found: error
+
+      - name: Upload macOS artifacts
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: ${{github.workspace}}/build/usbc-power-osd.app
+          if-no-files-found: error
+
+      - name: Upload Linux artifacts
+        if: matrix.os == 'ubuntu-22.04'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: ${{github.workspace}}/build/usbc-power-osd
           if-no-files-found: error
