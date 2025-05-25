@@ -1,8 +1,12 @@
-//
-// Created by Thomas Lamy on 11.04.25.
-//
-
 #include "SerialPortEnumerator.h"
+
+#include <vector>
+#include <wx/string.h>
+
+#ifdef __WXMSW__  // Only for Windows
+#include <wx/buffer.h>
+#include <wx/msw/registry.h>
+#endif
 
 #include <wx/arrstr.h>
 #include <wx/dir.h>
