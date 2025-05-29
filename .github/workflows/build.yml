@@ -111,7 +111,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: ${{github.workspace}}/build/Release/usbc-power-osd.exe
+          path: ${{github.workspace}}/build/usbc-power-osd.exe
           if-no-files-found: error
 
       - name: Upload macOS artifacts
