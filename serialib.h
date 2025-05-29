@@ -216,7 +216,7 @@ private:
     // Handle on serial device
     HANDLE          hSerial;
     // For setting serial port timeouts
-    LPCOMMTIMEOUTS    timeouts;
+    LPCOMMTIMEOUTS timeouts;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     int fd;

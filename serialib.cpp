@@ -225,15 +225,15 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
     // Set TimeOut
 
     // Set the Timeout parameters
-    timeouts->ReadIntervalTimeout=0;
+    timeouts->ReadIntervalTimeout = 0;
     // No TimeOut
-    timeouts->ReadTotalTimeoutConstant=MAXDWORD;
-    timeouts->ReadTotalTimeoutMultiplier=0;
-    timeouts->WriteTotalTimeoutConstant=MAXDWORD;
-    timeouts->WriteTotalTimeoutMultiplier=0;
+    timeouts->ReadTotalTimeoutConstant = MAXDWORD;
+    timeouts->ReadTotalTimeoutMultiplier = 0;
+    timeouts->WriteTotalTimeoutConstant = MAXDWORD;
+    timeouts->WriteTotalTimeoutMultiplier = 0;
 
     // Write the parameters
-    if(!SetCommTimeouts(hSerial, timeouts)) return -6;
+    if (!SetCommTimeouts(hSerial, timeouts)) return -6;
 
     // Opening successfull
     return 1;
@@ -507,10 +507,10 @@ int serialib::readChar(char *pByte, unsigned int timeOut_ms) const {
     DWORD dwBytesRead = 0;
 
     // Set the TimeOut
-    timeouts->ReadIntervalTimeout=timeOut_ms;
+    timeouts->ReadIntervalTimeout = timeOut_ms;
 
     // Write the parameters, return -1 if an error occured
-    if(!SetCommTimeouts(hSerial, timeouts)) return -1;
+    if (!SetCommTimeouts(hSerial, timeouts)) return -1;
 
     // Read the byte, return -2 if an error occured
     if(!ReadFile(hSerial,pByte, 1, &dwBytesRead, NULL)) return -2;
@@ -683,10 +683,10 @@ int serialib::readBytes(void *buffer, unsigned int maxNbBytes, unsigned int time
     DWORD dwBytesRead = 0;
 
     // Set the TimeOut
-    timeouts->ReadIntervalTimeout=timeOut_ms;
+    timeouts->ReadIntervalTimeout = timeOut_ms;
 
     // Write the parameters and return -1 if an error occrured
-    if(!SetCommTimeouts(hSerial, timeouts)) return -1;
+    if (!SetCommTimeouts(hSerial, timeouts)) return -1;
 
 
     // Read the bytes from the serial device, return -2 if an error occured
