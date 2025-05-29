@@ -68,6 +68,7 @@ message(STATUS "Fetching wxWidgets...")
 FetchContent_Declare(
         wxWidgets
         GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
+        GIT_TAG v3.2.8.1
         GIT_SHALLOW ON)
 FetchContent_MakeAvailable(wxWidgets)
 set(EXECUTABLE_NAME "USB-C Power")
@@ -82,8 +83,8 @@ set(SRCS
         OsdSettings.h
         SerialThread.cpp
         SerialThread.h
-        SerialDriver.cpp
-        SerialDriver.h
+        serialib.cpp
+        serialib.h
         SerialPortEnumerator.cpp
         SerialPortEnumerator.h
         Events.h
