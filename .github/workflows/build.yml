@@ -63,7 +63,6 @@ jobs:
           -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
           -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
           -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
-          -DCMAKE_PREFIX_PATH=${{env.Qt6_DIR}}
 
       - name: Configure CMake (Non-Windows)
         if: matrix.os != 'windows-cross'

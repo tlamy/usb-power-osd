@@ -39,17 +39,17 @@ This is a licence-free software, it can be used by anyone who try to build a bet
 
 // Include for Linux
 #if defined (__linux__) || defined(__APPLE__)
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/shm.h>
-#include <termios.h>
-#include <string.h>
-#include <iostream>
-#include <sys/time.h>
-// File control definitions
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
+    #include <stdlib.h>
+    #include <sys/types.h>
+    #include <sys/shm.h>
+    #include <termios.h>
+    #include <string.h>
+    #include <iostream>
+    #include <sys/time.h>
+    // File control definitions
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <sys/ioctl.h>
 #endif
 
 /*! To avoid unused parameters */
@@ -62,8 +62,8 @@ enum SerialDataBits {
     SERIAL_DATABITS_5, /**< 5 databits */
     SERIAL_DATABITS_6, /**< 6 databits */
     SERIAL_DATABITS_7, /**< 7 databits */
-    SERIAL_DATABITS_8, /**< 8 databits */
-    SERIAL_DATABITS_16, /**< 16 databits */
+    SERIAL_DATABITS_8,  /**< 8 databits */
+    SERIAL_DATABITS_16,  /**< 16 databits */
 };
 
 /**
@@ -89,17 +89,21 @@ enum SerialParity {
 /*!  \class     serialib
      \brief     This class is used for communication over a serial device.
 */
-class serialib {
+class serialib
+{
 public:
+
     //_____________________________________
     // ::: Constructors and destructors :::
 
 
+
     // Constructor of the class
-    serialib();
+    serialib    ();
 
     // Destructor
-    ~serialib();
+    ~serialib   ();
+
 
 
     //_________________________________________
@@ -116,7 +120,9 @@ public:
     bool isDeviceOpen() const;
 
     // Close the current device
-    void closeDevice();
+    void    closeDevice();
+
+
 
 
     //___________________________________________
@@ -124,10 +130,12 @@ public:
 
 
     // Write a char
-    int writeChar(char) const;
+    int     writeChar   (char) const;
 
     // Read a char (with timeout)
-    int readChar(char *pByte, const unsigned int timeOut_ms = 0) const;
+    int     readChar    (char *pByte,const unsigned int timeOut_ms=0) const;
+
+
 
 
     //________________________________________
@@ -135,13 +143,14 @@ public:
 
 
     // Write a string
-    int writeString(const char *String) const;
+    int     writeString (const char *String) const;
 
     // Read a string (with timeout)
-    int readString(char *receivedString,
-                   char finalChar,
-                   unsigned int maxNbBytes,
-                   const unsigned int timeOut_ms = 0, bool stripFinalChar = true) const;
+    int     readString  (char *receivedString,
+                         char finalChar,
+                         unsigned int maxNbBytes,
+                         const unsigned int timeOut_ms=0, bool stripFinalChar = true) const;
+
 
 
     // _____________________________________
@@ -149,11 +158,12 @@ public:
 
 
     // Write an array of bytes
-    int writeBytes(const void *Buffer, const unsigned int NbBytes) const;
+    int     writeBytes  (const void *Buffer, const unsigned int NbBytes) const;
 
     // Read an array of byte (with timeout)
-    int readBytes(void *buffer, unsigned int maxNbBytes, const unsigned int timeOut_ms = 0,
-                  unsigned int sleepDuration_us = 100) const;
+    int     readBytes   (void *buffer,unsigned int maxNbBytes,const unsigned int timeOut_ms=0, unsigned int sleepDuration_us=100) const;
+
+
 
 
     // _________________________
@@ -161,10 +171,12 @@ public:
 
 
     // Empty the received buffer
-    char flushReceiver() const;
+    char    flushReceiver() const;
 
     // Return the number of bytes in the received buffer
-    int available() const;
+    int     available() const;
+
+
 
 
     // _________________________
@@ -172,72 +184,76 @@ public:
 
 
     // Set CTR status (Data Terminal Ready, pin 4)
-    bool DTR(bool status);
-
-    bool setDTR();
-
-    bool clearDTR();
+    bool    DTR(bool status) const;
+    bool    setDTR() const;
+    bool    clearDTR() const;
 
     // Set RTS status (Request To Send, pin 7)
-    bool RTS(bool status);
-
-    bool setRTS();
-
-    bool clearRTS();
+    bool    RTS(bool status) const;
+    bool    setRTS() const;
+    bool    clearRTS() const;
 
     // Get RI status (Ring Indicator, pin 9)
-    bool isRI() const;
+    bool    isRI() const;
 
     // Get DCD status (Data Carrier Detect, pin 1)
-    bool isDCD() const;
+    bool    isDCD() const;
 
     // Get CTS status (Clear To Send, pin 8)
-    bool isCTS() const;
+    bool    isCTS() const;
 
     // Get DSR status (Data Set Ready, pin 9)
-    bool isDSR() const;
+    bool    isDSR() const;
 
     // Get RTS status (Request To Send, pin 7)
-    bool isRTS() const;
+    bool    isRTS() const;
 
     // Get CTR status (Data Terminal Ready, pin 4)
-    bool isDTR() const;
+    bool    isDTR() const;
+
 
 private:
     // Read a string (no timeout)
-    int readStringNoTimeOut(char *String, char FinalChar, unsigned int MaxNbBytes, bool stripFinalChar = true) const;
+    int             readStringNoTimeOut  (char *String, char FinalChar, unsigned int MaxNbBytes, bool stripFinalChar = true) const;
 
     // Current DTR and RTS state (can't be read on WIndows)
-    bool currentStateRTS;
-    bool currentStateDTR;
+    bool            currentStateRTS;
+    bool            currentStateDTR;
+
+
+
 
 
 #if defined (_WIN32) || defined( _WIN64)
     // Handle on serial device
     HANDLE          hSerial;
     // For setting serial port timeouts
-    LPCOMMTIMEOUTS timeouts;
+    COMMTIMEOUTS    timeouts;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    int fd;
+    int             fd;
 #endif
+
 };
+
 
 
 /*!  \class     timeOut
      \brief     This class can manage a timer which is used as a timeout.
    */
 // Class timeOut
-class timeOut {
+class timeOut
+{
 public:
+
     // Constructor
     timeOut();
 
     // Init the timer
-    void initTimer();
+    void                initTimer();
 
     // Return the elapsed time since initialization
-    unsigned long int elapsedTime_ms() const;
+    unsigned long int   elapsedTime_ms() const;
 
 private:
 #if defined (NO_POSIX_TIME)
@@ -246,7 +262,7 @@ private:
     LONGLONG       previousTime;
 #else
     // Used to store the previous time (for computing timeout)
-    struct timeval previousTime;
+    struct timeval      previousTime;
 #endif
 };
 

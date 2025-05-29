@@ -16,8 +16,6 @@ This is a licence-free software, it can be used by anyone who try to build a bet
  */
 
 // ReSharper disable CppJoinDeclarationAndAssignment
-// ReSharper disable CppDFAConstantParameter
-// ReSharper disable CppDFAConstantConditions
 #include "serialib.h"
 
 
@@ -28,17 +26,14 @@ This is a licence-free software, it can be used by anyone who try to build a bet
 /*!
     \brief      Constructor of the class serialib.
 */
-serialib::serialib() {
+serialib::serialib(): currentStateRTS(false), currentStateDTR(false) {
 #if defined (_WIN32) || defined( _WIN64)
     // Set default value for RTS and DTR (Windows only)
     currentStateRTS=true;
     currentStateDTR=true;
     hSerial = INVALID_HANDLE_VALUE;
-    timeouts = new COMMTIMEOUTS;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    currentStateRTS=true;
-    currentStateDTR=true;
     fd = -1;
 #endif
 }
@@ -225,15 +220,15 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
     // Set TimeOut
 
     // Set the Timeout parameters
-    timeouts->ReadIntervalTimeout = 0;
+    timeouts.ReadIntervalTimeout=0;
     // No TimeOut
-    timeouts->ReadTotalTimeoutConstant = MAXDWORD;
-    timeouts->ReadTotalTimeoutMultiplier = 0;
-    timeouts->WriteTotalTimeoutConstant = MAXDWORD;
-    timeouts->WriteTotalTimeoutMultiplier = 0;
+    timeouts.ReadTotalTimeoutConstant=MAXDWORD;
+    timeouts.ReadTotalTimeoutMultiplier=0;
+    timeouts.WriteTotalTimeoutConstant=MAXDWORD;
+    timeouts.WriteTotalTimeoutMultiplier=0;
 
     // Write the parameters
-    if (!SetCommTimeouts(hSerial, timeouts)) return -6;
+    if(!SetCommTimeouts(hSerial, &timeouts)) return -6;
 
     // Opening successfull
     return 1;
@@ -507,10 +502,10 @@ int serialib::readChar(char *pByte, unsigned int timeOut_ms) const {
     DWORD dwBytesRead = 0;
 
     // Set the TimeOut
-    timeouts->ReadIntervalTimeout = timeOut_ms;
+    timeouts.ReadTotalTimeoutConstant=timeOut_ms;
 
     // Write the parameters, return -1 if an error occured
-    if (!SetCommTimeouts(hSerial, timeouts)) return -1;
+    if(!SetCommTimeouts(hSerial, &timeouts)) return -1;
 
     // Read the byte, return -2 if an error occured
     if(!ReadFile(hSerial,pByte, 1, &dwBytesRead, NULL)) return -2;
@@ -551,8 +546,7 @@ int serialib::readChar(char *pByte, unsigned int timeOut_ms) const {
      \return -2 error while reading the byte
      \return -3 MaxNbBytes is reached
   */
-int serialib::readStringNoTimeOut(char *receivedString, char finalChar, unsigned int maxNbBytes,
-                                  bool stripFinalChar) const {
+int serialib::readStringNoTimeOut(char *receivedString, char finalChar, unsigned int maxNbBytes, bool stripFinalChar) const {
     // Number of characters read
     unsigned int NbBytes = 0;
     // Returned value from Read
@@ -601,8 +595,7 @@ int serialib::readStringNoTimeOut(char *receivedString, char finalChar, unsigned
      \return -2 error while reading the character
      \return -3 MaxNbBytes is reached
   */
-int serialib::readString(char *receivedString, char finalChar, unsigned int maxNbBytes, unsigned int timeOut_ms,
-                         bool stripFinalChar) const {
+int serialib::readString(char *receivedString, char finalChar, unsigned int maxNbBytes, unsigned int timeOut_ms, bool stripFinalChar) const {
     // Check if timeout is requested
     if (timeOut_ms == 0) return readStringNoTimeOut(receivedString, finalChar, maxNbBytes);
 
@@ -683,10 +676,10 @@ int serialib::readBytes(void *buffer, unsigned int maxNbBytes, unsigned int time
     DWORD dwBytesRead = 0;
 
     // Set the TimeOut
-    timeouts->ReadIntervalTimeout = timeOut_ms;
+    timeouts.ReadTotalTimeoutConstant=(DWORD)timeOut_ms;
 
     // Write the parameters and return -1 if an error occrured
-    if (!SetCommTimeouts(hSerial, timeouts)) return -1;
+    if(!SetCommTimeouts(hSerial, &timeouts)) return -1;
 
 
     // Read the bytes from the serial device, return -2 if an error occured
@@ -787,7 +780,7 @@ int serialib::available() const {
                 If the function succeeds, the return value is true.
 */
 // ReSharper disable once CppDFAConstantFunctionResult
-bool serialib::DTR(bool status) {
+bool serialib::DTR(bool status) const {
     if (status)
         // Set DTR
         return this->setDTR();
@@ -803,7 +796,7 @@ bool serialib::DTR(bool status) {
     \return     If the function fails, the return value is false
                 If the function succeeds, the return value is true.
 */
-bool serialib::setDTR() {
+bool serialib::setDTR() const {
 #if defined (_WIN32) || defined(_WIN64)
     // Set DTR
     currentStateDTR=true;
@@ -825,7 +818,7 @@ bool serialib::setDTR() {
     \return     If the function fails, the return value is false
                 If the function succeeds, the return value is true.
 */
-bool serialib::clearDTR() {
+bool serialib::clearDTR() const {
 #if defined (_WIN32) || defined(_WIN64)
     // Clear DTR
     currentStateDTR=false;
@@ -852,7 +845,7 @@ bool serialib::clearDTR() {
     \return     true if the function succeeds
 */
 // ReSharper disable once CppDFAConstantFunctionResult
-bool serialib::RTS(bool status) {
+bool serialib::RTS(bool status) const {
     if (status)
         // Set RTS
         return this->setRTS();
@@ -868,7 +861,7 @@ bool serialib::RTS(bool status) {
     \return     If the function fails, the return value is false
                 If the function succeeds, the return value is true.
 */
-bool serialib::setRTS() {
+bool serialib::setRTS() const {
 #if defined (_WIN32) || defined(_WIN64)
     // Set RTS
     currentStateRTS=true;
@@ -891,7 +884,7 @@ bool serialib::setRTS() {
     \return     If the function fails, the return value is false
                 If the function succeeds, the return value is true.
 */
-bool serialib::clearRTS() {
+bool serialib::clearRTS() const {
 #if defined (_WIN32) || defined(_WIN64)
     // Clear RTS
     currentStateRTS=false;
