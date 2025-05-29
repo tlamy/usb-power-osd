@@ -30,7 +30,7 @@ static int8_t hex2bin(unsigned char c) {
 
 static int16_t hex4_to_uint16(const char *buf) {
     const int16_t val = 0 | (hex2bin(buf[0]) << 12) | (hex2bin(buf[1]) << 8) | // NOLINT(*-narrowing-conversions)
-                  (hex2bin(buf[2]) << 4) | hex2bin(buf[3]);
+                        (hex2bin(buf[2]) << 4) | hex2bin(buf[3]);
     return val;
 }
 
@@ -56,13 +56,13 @@ bool SerialThread::measure_loop(const std::string &device) {
         return false;
     }
     char line[100];
-    int bytes_read = port->readString(line,'\n', 100, 1000);
+    int bytes_read = port->readString(line, '\n', 100, 1000);
     if (bytes_read < 0) {
         std::cerr << "Read error" << std::endl;
         return false;
     }
 
-    bytes_read = port->readString(line, '\n',100, 1000);
+    bytes_read = port->readString(line, '\n', 100, 1000);
     if (bytes_read < 0) {
         std::cerr << "Read error or timeout" << std::endl;
         port->closeDevice();
@@ -90,7 +90,7 @@ bool SerialThread::measure_loop(const std::string &device) {
 
         if (TestDestroy()) return false;
 
-        bytes_read = port->readString(line,'\n', 100, 250);
+        bytes_read = port->readString(line, '\n', 100, 250);
         if (bytes_read < 0) {
             std::cerr << "Read error or timeout" << std::endl;
             break;
