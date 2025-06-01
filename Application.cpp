@@ -226,7 +226,7 @@ void MainFrame::OnDataUpdate(wxThreadEvent &event) {
 
 void MainFrame::OnFontChanged(const wxFont &wx_font) {
     auto mainFont = new wxFont(wx_font.GetPointSize(), wx_font.GetFamily(), wx_font.GetStyle(),
-                                  wx_font.GetWeight());
+                               wx_font.GetWeight());
     mainFont->SetFaceName(wx_font.GetFaceName());
     this->m_volts_font = mainFont;
     this->m_amps_font = mainFont;
