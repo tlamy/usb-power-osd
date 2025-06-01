@@ -93,7 +93,11 @@ jobs:
           ${{ matrix.os == 'macos-latest' && '-DCMAKE_CXX_FLAGS=-D_DARWIN_C_SOURCE' || '' }}
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} -- -j$(nproc)
+        run: |
+          MAX_CORES=8
+          CORES=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+          JOBS=$(( CORES < MAX_CORES ? CORES : MAX_CORES ))
+          cmake --build ${{ github.workspace }}/build --config ${{ matrix.build_type }} --parallel $JOBS
 
       # macOS code signing
       - name: Sign the macOS application
