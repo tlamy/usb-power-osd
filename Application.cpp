@@ -11,7 +11,7 @@
 #include "SerialThread.h"
 #include "SettingsDialog.h"
 
-class MyApp : public wxApp {
+class MyApp final : public wxApp {
 public:
     bool OnInit() override;
 };
@@ -172,7 +172,7 @@ void MainFrame::ToggleLineGraph(wxCommandEvent &event) {
     settings.is_line_graph = this->m_graph_style == GraphPanel::STYLE_LINE;
 }
 
-void MainFrame::OnGrapthTypeChanged(bool isLineGraph) {
+void MainFrame::OnGrapthTypeChanged(const bool isLineGraph) {
     this->m_graph_style = isLineGraph ? GraphPanel::STYLE_LINE : GraphPanel::STYLE_BAR;
     this->m_graph_panel->SetGraphStyle(this->m_graph_style);
     wxMenuItem *item = GetMenuBar()->FindItem(LINEGRAPH);
@@ -225,7 +225,7 @@ void MainFrame::OnDataUpdate(wxThreadEvent &event) {
 }
 
 void MainFrame::OnFontChanged(const wxFont &wx_font) {
-    wxFont *mainFont = new wxFont(wx_font.GetPointSize(), wx_font.GetFamily(), wx_font.GetStyle(),
+    auto mainFont = new wxFont(wx_font.GetPointSize(), wx_font.GetFamily(), wx_font.GetStyle(),
                                   wx_font.GetWeight());
     mainFont->SetFaceName(wx_font.GetFaceName());
     this->m_volts_font = mainFont;
@@ -239,7 +239,7 @@ void MainFrame::OnFontChanged(const wxFont &wx_font) {
     this->m_watts->SetFont(minMaxFont);
 }
 
-void MainFrame::OnAlwaysOnTopChanged(bool always_on_top) {
+void MainFrame::OnAlwaysOnTopChanged(const bool always_on_top) {
     if (always_on_top) {
         this->SetWindowStyleFlag(this->GetWindowStyleFlag() | wxSTAY_ON_TOP);
     } else {

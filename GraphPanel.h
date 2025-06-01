@@ -10,7 +10,7 @@
 #include "wx/panel.h"
 
 
-class GraphPanel : public wxPanel {
+class GraphPanel final : public wxPanel {
 public:
     GraphPanel(wxWindow *parent, wxSize size);
 
@@ -35,8 +35,8 @@ private:
     int m_size;
     int m_current_min = 0;
     int m_current_max = 0;
-    static int max(const std::deque<int>& deque);
 
+    static int maxDequeueItem(const std::deque<int> &deque);
 };
 
 
