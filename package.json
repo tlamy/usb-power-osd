@@ -1,0 +1,34 @@
+{
+  "name": "usb-power-osd",
+  "version": "0.0.0-development",
+  "description": "On Screen Display for USB-C Power Meter (compatible to PLD's)",
+  "main": "index.js",
+  "scripts": {
+    "semantic-release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tlamy/usb-power-osd.git"
+  },
+  "keywords": [
+    "usb-c",
+    "power-meter",
+    "osd",
+    "display"
+  ],
+  "author": "tlamy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tlamy/usb-power-osd/issues"
+  },
+  "homepage": "https://github.com/tlamy/usb-power-osd#readme",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^11.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.2.6",
+    "@semantic-release/npm": "^11.0.2",
+    "@semantic-release/release-notes-generator": "^12.1.0",
+    "semantic-release": "^22.0.12"
+  }
+}

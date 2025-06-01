@@ -1,6 +1,9 @@
 name: Build
 
 on:
+  workflow_call:
+    secrets:
+      inherit
   push:
     branches: [ main ]
   pull_request:
