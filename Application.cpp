@@ -211,7 +211,6 @@ void MainFrame::OnDataUpdate(wxThreadEvent &event) {
     this->m_watts->SetLabel(
         wxString::Format("%0.3fW", theEvent->GetMilliVolts() * theEvent->GetMilliAmps() / 1000000.0));
     auto voltage = PowerDelivery::getEnum(theEvent->GetMilliVolts());
-    this->m_graph_panel->add(theEvent->GetMilliAmps(), voltage);
     wxString voltage_str = wxString::Format("%0dV", PowerDelivery::getVoltage(voltage));
     wxString amp_str = wxString::Format("%0.3fA", theEvent->GetMilliAmps() / 1000.0);
     this->m_voltage->SetLabel(voltage_str);
@@ -220,6 +219,9 @@ void MainFrame::OnDataUpdate(wxThreadEvent &event) {
     this->m_graph_panel->GetMinMaxCurrent(&minCurrent, &maxCurrent);
     const wxString min_str = wxString::Format("%0.3fA-%0.3fA", minCurrent / 1000.0, maxCurrent / 1000.0);
     this->m_current_minmax->SetLabel(min_str);
+    if (theEvent->GetMilliVolts() > 500 && theEvent->GetMilliAmps() >= settings.min_current) {
+        this->m_graph_panel->add(theEvent->GetMilliAmps(), voltage);
+    }
 }
 
 void MainFrame::OnFontChanged(const wxFont &wx_font) {

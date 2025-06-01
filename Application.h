@@ -37,7 +37,7 @@ public:
 
     void OnDataUpdate(wxThreadEvent &event);
 
-    void OnFontChanged(const wxFont & wx_font);
+    void OnFontChanged(const wxFont &wx_font);
 
     void OnAlwaysOnTopChanged(bool always_on_top);
 
