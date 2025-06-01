@@ -67,9 +67,9 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/build
-          key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ matrix.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-cmake-
+            ${{ matrix.os }}-cmake-
 
       - name: Configure CMake for Windows
         if: matrix.os == 'windows-cross'
