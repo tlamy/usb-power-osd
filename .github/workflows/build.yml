@@ -10,19 +10,20 @@ on:
 jobs:
   build:
     name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on || matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-latest, windows-latest ]
+        os: [ ubuntu-22.04, macos-latest, windows-cross ]
         build_type: [ Release ]
         include:
-          - os: windows-latest
-            generator: "Visual Studio 17 2022"
-          - os: ubuntu-22.04  # Make sure to update this to match
+          - os: ubuntu-22.04
             generator: "Unix Makefiles"
           - os: macos-latest
             generator: "Unix Makefiles"
+          - os: windows-cross
+            generator: "Unix Makefiles"
+            runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +33,7 @@ jobs:
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu-22.04'
         run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev
 
@@ -44,12 +46,32 @@ jobs:
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ github.run_id }}
 
-      - name: Configure CMake
+      - name: Install MinGW and dependencies
+        if: matrix.os == 'windows-cross'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64 cmake zip
+
+      - name: Configure CMake for Windows
+        if: matrix.os == 'windows-cross'
+        run: |
+          cmake -B ${{github.workspace}}/build \
+          -G "Unix Makefiles" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_SYSTEM_NAME=Windows \
+          -DCMAKE_CROSSCOMPILING=TRUE \
+          -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+          -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+          -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+
+      - name: Configure CMake (Non-Windows)
+        if: matrix.os != 'windows-cross'
         run: >
           cmake -B ${{github.workspace}}/build 
           -G "${{matrix.generator}}" 
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          ${{ matrix.os == 'macos-latest' && '-DCMAKE_CXX_FLAGS=-D_DARWIN_C_SOURCE' || '' }}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
@@ -58,9 +80,11 @@ jobs:
       - name: Sign the macOS application
         if: matrix.os == 'macos-latest'
         env:
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CERT_NAME: "Developer ID Application: ${{ vars.APPLE_SIGNING_ID }}"
         run: |
-          /usr/bin/codesign --force --options runtime --sign "Developer ID Application: $TEAM_ID" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
+          export XX="#$CERT_NAME#"
+          echo "Using cert name: $XX"
+          /usr/bin/codesign --force --options runtime --sign "$CERT_NAME" --verbose "${{github.workspace}}/build/usbc-power-osd.app"
 
       # macOS notarization (optional but recommended)
       - name: Notarize the macOS application
@@ -68,7 +92,6 @@ jobs:
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           # Create a ZIP archive of the app
           ditto -c -k --keepParent "${{github.workspace}}/build/usbc-power-osd.app" "${{github.workspace}}/build/usbc-power-osd.zip"
@@ -77,18 +100,18 @@ jobs:
           xcrun notarytool submit "${{github.workspace}}/build/usbc-power-osd.zip" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PASSWORD" \
-            --team-id "$TEAM_ID" \
+            --team-id "${{vars.APPLE_TEAM_ID}}" \
             --wait
           
           # Staple the notarization ticket
           xcrun stapler staple "${{github.workspace}}/build/usbc-power-osd.app"
 
       - name: Upload Windows artifacts
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-cross'
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: ${{github.workspace}}/build/Release/usbc-power-osd.exe
+          path: ${{github.workspace}}/build/usbc-power-osd.exe
           if-no-files-found: error
 
       - name: Upload macOS artifacts
