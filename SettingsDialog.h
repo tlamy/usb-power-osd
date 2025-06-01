@@ -21,7 +21,7 @@
 
 #include "Application.h"
 #include "OsdSettings.h"
-#include "cmake-build-mingw-release/_deps/wxwidgets-src/include/wx/clrpicker.h"
+#include "wx/clrpicker.h"
 #include "wx/fontpicker.h"
 
 class SettingsDialog final : public wxDialog {

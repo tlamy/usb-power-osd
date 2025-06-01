@@ -2,7 +2,6 @@
 
 #include "Events.h"
 #include "OsdSettings.h"
-#include "cmake-build-mingw-release/_deps/wxwidgets-src/include/wx/txtstrm.h"
 #include "wx/clrpicker.h"
 
 enum {
