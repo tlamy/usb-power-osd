@@ -4,7 +4,6 @@
 #include "OsdSettings.h"
 #include "wx/txtstrm.h"
 
-// Custom panel for drawing a graph
 GraphPanel::GraphPanel(wxWindow* parent, wxSize size) : wxPanel(parent, wxID_ANY)
 {
     // Set minimum size for the graph panel
@@ -13,6 +12,8 @@ GraphPanel::GraphPanel(wxWindow* parent, wxSize size) : wxPanel(parent, wxID_ANY
     this->m_size = size.x;
     this->m_currents.resize(size.x, 0);
     this->m_voltages.resize(size.x, PowerDelivery::PD_NONE);
+
+    this->m_graph_style = settings.is_line_graph ? STYLE_LINE : STYLE_BAR;
 
     // Set background color
     //wxWindow::SetBackgroundColour(settings.color_bg);
