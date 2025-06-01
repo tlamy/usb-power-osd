@@ -2,6 +2,15 @@ name: Build
 
 on:
   workflow_call:
+    secrets:
+      APPLE_CERTIFICATE_BASE64:
+        required: true
+      APPLE_CERTIFICATE_PASSWORD:
+        required: true
+      APPLE_ID:
+        required: true
+      APPLE_ID_PASSWORD:
+        required: true
   push:
     branches: [ main ]
   pull_request:
