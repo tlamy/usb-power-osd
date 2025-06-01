@@ -2,6 +2,7 @@
 
 #include "Events.h"
 #include "OsdSettings.h"
+#include "cmake-build-mingw-release/_deps/wxwidgets-src/include/wx/txtstrm.h"
 #include "wx/clrpicker.h"
 
 enum {
@@ -24,177 +25,234 @@ SettingsDialog::SettingsDialog(wxWindow *parent)
 }
 
 void SettingsDialog::CreateControls() {
-    wxClientDC dc(this);
-    dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-    wxCoord labelWidth, labelHeight;
-    dc.GetTextExtent("Full Window Style:", &labelWidth, &labelHeight);
-    auto w = labelWidth + 10;
-    m_label_size = wxSize(w, -1);
+    	wxBoxSizer* lines;
+	lines = new wxBoxSizer( wxVERTICAL );
 
-    wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+	auto line01 = new wxBoxSizer(wxHORIZONTAL);
 
-    wxPanel *generalPanel = new wxPanel(this);
+	m_lbl_font = new wxStaticText( this, wxID_ANY, _("Font:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_font->Wrap( -1 );
+	line01->Add( m_lbl_font, 0, wxALL, 5 );
 
-    wxBoxSizer *generalSizer = new wxBoxSizer(wxVERTICAL);
-    // Inside your General or Appearance panel
+	wxFont font = wxFont(m_settings.volts_font_size, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+	font.SetPointSize(m_settings.volts_font_size);
+	font.SetFaceName(this->m_settings.volts_amps_font);
 
-    // Font picker
-    wxFont font = wxFont(m_settings.volts_font_size, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    font.SetPointSize(m_settings.volts_font_size);
-    font.SetFaceName(this->m_settings.volts_amps_font);
+	m_fontpicker = new wxFontPickerCtrl( this, wxID_ANY, font, wxDefaultPosition, wxDefaultSize, wxFNTP_DEFAULT_STYLE );
+	m_fontpicker->SetMaxPointSize( 100 );
+	m_fontpicker->Bind( wxEVT_FONTPICKER_CHANGED, &SettingsDialog::OnFontChanged, this );
+	line01->Add( m_fontpicker, 0, wxALL, 5 );
 
-    m_fontPicker = new wxFontPickerCtrl(generalPanel, wxID_ANY, font,
-                                        wxDefaultPosition, wxDefaultSize,
-                                        0);
-    m_fontPicker->Bind(wxEVT_FONTPICKER_CHANGED, &SettingsDialog::OnFontChanged, this);
-    wxBoxSizer *fontSizer = new wxBoxSizer(wxHORIZONTAL);
-    fontSizer->Add(new wxStaticText(generalPanel, wxID_ANY, "Font:", wxDefaultPosition, m_label_size, wxALIGN_RIGHT), 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    fontSizer->AddStretchSpacer(1);
-    fontSizer->Add(m_fontPicker, 0, wxEXPAND | wxALL, 5);
-    fontSizer->AddStretchSpacer(1);
 
-    generalSizer->Add(fontSizer, 0, wxEXPAND | wxALL, 5);
+	lines->Add( line01, 1, wxEXPAND, 5 );
 
-    // Preview label
-    m_fontPreview = new wxStaticText(generalPanel, wxID_ANY, "01.234A", wxDefaultPosition, wxSize(this->GetSize().GetWidth() - 50, -1), wxALIGN_CENTER);
-    m_fontPreview->SetFont(font);
-    m_fontPreview->SetForegroundColour(wxColour(255, 255, 255));
-    m_fontPreview->SetBackgroundColour(wxColour(0, 0, 0));
+	m_sample = new wxStaticText( this, wxID_ANY, _("12.038A"), wxDefaultPosition, wxSize( 300,-1 ), wxALIGN_CENTER_HORIZONTAL );
+	m_sample->Wrap( -1 );
+	m_sample->SetFont( wxFont( 48, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxT("Andale Mono") ) );
+	m_sample->SetForegroundColour( wxColour( 251, 255, 255 ) );
+	m_sample->SetBackgroundColour( wxColour( 0, 0, 0 ) );
 
-    generalSizer->Add(m_fontPreview, 0, wxALL, 5);
+	lines->Add( m_sample, 0, wxALL, 5 );
 
-    auto onTopCheckbox = new wxCheckBox(generalPanel, wxID_ANY, "Always on top");
-    onTopCheckbox->SetValue(this->m_settings.always_on_top);
-    onTopCheckbox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& event) {
-        this->m_settings.always_on_top = event.IsChecked();
-    });
-    auto onTopSizer = new wxBoxSizer(wxHORIZONTAL);
-    onTopSizer->Add(new wxStaticText(generalPanel, wxID_ANY, "Window style:",wxDefaultPosition,m_label_size, wxALIGN_RIGHT), 0, wxTOP | wxLEFT, 5);
-    onTopSizer->AddStretchSpacer(1);
-    onTopSizer->Add(onTopCheckbox, 1, wxALIGN_CENTER_VERTICAL, 5);
-    onTopSizer->AddStretchSpacer(1);
-    generalSizer->Add(onTopSizer, 0, wxEXPAND | wxRIGHT | wxTOP, 5);
+	auto line02 = new wxBoxSizer( wxHORIZONTAL );
 
-    auto graphSizerSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto labelText = new wxStaticText(generalPanel, wxID_ANY, "Graph Style:", wxDefaultPosition, m_label_size, wxALIGN_RIGHT);
-    graphSizerSizer->Add(labelText, 0, wxALIGN_CENTER_VERTICAL);
-    graphSizerSizer->AddStretchSpacer(1);
-    auto radio1 = new wxRadioButton(generalPanel, wxID_ANY, "Area", wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    radio1->Bind(wxEVT_COMMAND_RADIOBUTTON_SELECTED, [this](wxCommandEvent&) {
-        this->m_settings.is_line_graph = false;
-    });
+	m_lbl_graph = new wxStaticText( this, wxID_ANY, _("Graph Style:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_graph->Wrap( -1 );
+	line02->Add( m_lbl_graph, 0, wxALL, 5 );
 
-    auto radio2 = new wxRadioButton(generalPanel, wxID_ANY, "Line");
-    radio2->Bind(wxEVT_COMMAND_RADIOBUTTON_SELECTED, [this](wxCommandEvent&) {
-        this->m_settings.is_line_graph = true;
-    });
-    if (this->m_settings.is_line_graph) {
-        radio2->SetValue(true);
-    } else {
-        radio1->SetValue(true);
-    }
+	m_radio_area = new wxRadioButton( this, wxID_ANY, _("Area"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+	m_radio_area->Bind(wxEVT_COMMAND_RADIOBUTTON_SELECTED, [this](wxCommandEvent &) {this->m_settings.is_line_graph = false;});
+	line02->Add( m_radio_area, 0, wxALL, 5 );
 
-    graphSizerSizer->Add(radio1, 1, wxALIGN_CENTER_VERTICAL, 5);
-    graphSizerSizer->Add(radio2, 1, wxALIGN_CENTER_VERTICAL, 5);
-    graphSizerSizer->AddStretchSpacer(1);
+	m_radio_line = new wxRadioButton( this, wxID_ANY, _("Line"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_radio_line->Bind(wxEVT_COMMAND_RADIOBUTTON_SELECTED, [this](wxCommandEvent &) {this->m_settings.is_line_graph = true;});
+	line02->Add( m_radio_line, 0, wxALL, 5 );
 
-    generalSizer->Add(graphSizerSizer, 0, wxEXPAND | wxRIGHT | wxTOP, 5);
+	lines->Add( line02, 1, wxEXPAND, 5 );
 
-    AddColorPickerRow(generalSizer, generalPanel, "5V Color:", this->m_settings.color_5v, &SettingsDialog::OnColor5V);
-    AddColorPickerRow(generalSizer, generalPanel, "9V Color:", this->m_settings.color_9v, &SettingsDialog::OnColor9V);
-    AddColorPickerRow(generalSizer, generalPanel, "15V Color:", this->m_settings.color_15v,
-                      &SettingsDialog::OnColor15V);
-    AddColorPickerRow(generalSizer, generalPanel, "20V Color:", this->m_settings.color_20v,
-                      &SettingsDialog::OnColor20V);
-    AddColorPickerRow(generalSizer, generalPanel, "28V Color:", this->m_settings.color_28v,
-                      &SettingsDialog::OnColor28V);
-    AddColorPickerRow(generalSizer, generalPanel, "36V Color:", this->m_settings.color_36v,
-                      &SettingsDialog::OnColor36V);
-    AddColorPickerRow(generalSizer, generalPanel, "48V Color:", this->m_settings.color_48v,
-                      &SettingsDialog::OnColor48V);
+	auto line03 = new wxBoxSizer( wxHORIZONTAL );
 
-    generalPanel->SetSizer(generalSizer);
+	m_lbl_window = new wxStaticText( this, wxID_ANY, _("Window:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_window->Wrap( -1 );
+	line03->Add( m_lbl_window, 0, wxALL, 5 );
 
-    topSizer->Add(generalPanel, 1, wxEXPAND | wxALL, 10);
+	m_checkbox_top = new wxCheckBox( this, wxID_ANY, _("Always on top"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_checkbox_top->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent &event) {this->m_settings.always_on_top = event.IsChecked();});
+	line03->Add( m_checkbox_top, 0, wxALL, 5 );
 
-    // --- Buttons
-    wxBoxSizer *btnSizer = new wxBoxSizer(wxHORIZONTAL);
-    btnSizer->AddStretchSpacer(1);
-    btnSizer->Add(new wxButton(this, wxID_OK, "OK"), 0, wxALL, 5);
-    btnSizer->Add(new wxButton(this, wxID_APPLY, "Apply"), 0, wxALL, 5);
-    btnSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-    btnSizer->Add(new wxButton(this, ID_Button_Defaults, "Defaults"), 0, wxALL, 5);
 
-    topSizer->Add(btnSizer, 0, wxEXPAND | wxALL, 5);
+	lines->Add( line03, 1, wxEXPAND, 5 );
 
-    SetSizerAndFit(topSizer);
+	auto line04 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lbl_mincurrent = new wxStaticText( this, wxID_ANY, _("Min. Current:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_mincurrent->Wrap( -1 );
+	line04->Add( m_lbl_mincurrent, 0, wxALL, 5 );
+
+	m_txt_mincurrent = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 40,-1 ), 0 );
+	#ifdef __WXGTK__
+	if ( !m_txt_mincurrent->HasFlag( wxTE_MULTILINE ) )
+	{
+	m_txt_mincurrent->SetMaxLength( 3 );
+	}
+	#else
+	m_txt_mincurrent->SetMaxLength( 3 );
+	#endif
+	m_txt_mincurrent->Bind(wxEVT_TEXT, [this](wxCommandEvent &event) {
+		unsigned long value;
+if (event.GetString().ToULong(&value)) {
+	// Success — value now contains the parsed number
+	unsigned int minCurrent = static_cast<unsigned int>(value);
+	if (minCurrent >= 0 && minCurrent <= 999) {
+		m_settings.min_current = minCurrent;
+	}
+
+} else {
+	// Handle invalid input
+	wxLogWarning("Invalid unsigned integer entered");
+}
+	});
+	line04->Add( m_txt_mincurrent, 0, wxALL, 5 );
+
+	m_ma = new wxStaticText( this, wxID_ANY, _("mA"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_ma->Wrap( -1 );
+	line04->Add( m_ma, 0, wxALL, 5 );
+
+
+	lines->Add( line04, 1, wxEXPAND, 5 );
+
+	auto line05 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lbl_c5v = new wxStaticText( this, wxID_ANY, _("5V Color:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_c5v->Wrap( -1 );
+	line05->Add( m_lbl_c5v, 0, wxALL, 5 );
+
+	m_cp_5v = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	m_cp_5v->Bind(wxEVT_COLOURPICKER_CHANGED, [this](wxColourPickerEvent &event) {this->m_settings.color_5v = event.GetColour();});
+	line05->Add( m_cp_5v, 0, wxALL, 5 );
+
+
+	lines->Add( line05, 1, wxEXPAND, 5 );
+
+	auto line06 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lbl_c9v = new wxStaticText( this, wxID_ANY, _("9V Color:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_c9v->Wrap( -1 );
+	line06->Add( m_lbl_c9v, 0, wxALL, 5 );
+
+	m_cp_9v = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	m_cp_9v->Bind(wxEVT_COLOURPICKER_CHANGED, [this](wxColourPickerEvent &event) {this->m_settings.color_9v = event.GetColour();});
+	line06->Add( m_cp_9v, 0, wxALL, 5 );
+
+
+	lines->Add( line06, 1, wxEXPAND, 5 );
+
+	auto line07 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lbl_c15v = new wxStaticText( this, wxID_ANY, _("15V Color:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_c15v->Wrap( -1 );
+	line07->Add( m_lbl_c15v, 0, wxALL, 5 );
+
+	m_cp_15v = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	m_cp_15v->Bind(wxEVT_COLOURPICKER_CHANGED, [this](wxColourPickerEvent &event) {this->m_settings.color_15v = event.GetColour();});
+	line07->Add( m_cp_15v, 0, wxALL, 5 );
+
+
+	lines->Add( line07, 1, wxEXPAND, 5 );
+
+	auto line08 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lbl_c20v = new wxStaticText( this, wxID_ANY, _("20V Color:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_c20v->Wrap( -1 );
+	line08->Add( m_lbl_c20v, 0, wxALL, 5 );
+
+	m_cp_20v = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	m_cp_20v->Bind(wxEVT_COLOURPICKER_CHANGED, [this](wxColourPickerEvent &event) {this->m_settings.color_20v = event.GetColour();});
+	line08->Add( m_cp_20v, 0, wxALL, 5 );
+
+
+	lines->Add( line08, 1, wxEXPAND, 5 );
+
+	auto line09 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lbl_c28v = new wxStaticText( this, wxID_ANY, _("28V Color:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_c28v->Wrap( -1 );
+	line09->Add( m_lbl_c28v, 0, wxALL, 5 );
+
+	m_cp_28v = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	m_cp_28v->Bind(wxEVT_COLOURPICKER_CHANGED, [this](wxColourPickerEvent &event) {this->m_settings.color_28v = event.GetColour();});
+	line09->Add( m_cp_28v, 0, wxALL, 5 );
+
+
+	lines->Add( line09, 1, wxEXPAND, 5 );
+
+	auto line10 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lvl_c36v = new wxStaticText( this, wxID_ANY, _("36V Color:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lvl_c36v->Wrap( -1 );
+	line10->Add( m_lvl_c36v, 0, wxALL, 5 );
+
+	m_cp_36v = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	m_cp_36v->Bind(wxEVT_COLOURPICKER_CHANGED, [this](wxColourPickerEvent &event) {this->m_settings.color_36v = event.GetColour();});
+	line10->Add( m_cp_36v, 0, wxALL, 5 );
+
+
+	lines->Add( line10, 1, wxEXPAND, 5 );
+
+	auto line11 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_lbl_c48v = new wxStaticText( this, wxID_ANY, _("48V Color:"), wxDefaultPosition, wxSize( 100,-1 ), wxALIGN_RIGHT );
+	m_lbl_c48v->Wrap( -1 );
+	line11->Add( m_lbl_c48v, 0, wxALL, 5 );
+
+	m_cp_48v = new wxColourPickerCtrl( this, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	m_cp_48v->Bind(wxEVT_COLOURPICKER_CHANGED, [this](wxColourPickerEvent &event) {this->m_settings.color_48v = event.GetColour();});
+	line11->Add( m_cp_48v, 0, wxALL, 5 );
+
+
+	lines->Add( line11, 1, wxEXPAND, 5 );
+
+	wxBoxSizer *btnSizer = new wxBoxSizer(wxHORIZONTAL);
+	btnSizer->AddStretchSpacer(1);
+	btnSizer->Add(new wxButton(this, wxID_OK, "OK"), 0, wxALL, 5);
+	btnSizer->Add(new wxButton(this, wxID_APPLY, "Apply"), 0, wxALL, 5);
+	btnSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
+	btnSizer->Add(new wxButton(this, ID_Button_Defaults, "Defaults"), 0, wxALL, 5);
+
+	lines->Add(btnSizer, 0, wxEXPAND | wxALL, 5);
+
+	this->setControlValues();
+	this->SetSizerAndFit( lines );
 }
 
-void SettingsDialog::AddColorPickerRow(wxSizer *parentSizer,
-                                       wxWindow *parent,
-                                       const wxString &label,
-                                       const wxColour &initialColor,
-                                       void (SettingsDialog::*handler)(wxColourPickerEvent &)) {
-    auto rowSizer = new wxBoxSizer(wxHORIZONTAL);
+void SettingsDialog::setControlValues() {
+	auto font = wxFont(m_settings.volts_font_size, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+	font.SetPointSize(m_settings.volts_font_size);
+	font.SetFaceName(this->m_settings.volts_amps_font);
 
-    // Label sizer to right-align the label
-    auto labelSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto labelText = new wxStaticText(parent, wxID_ANY, label, wxDefaultPosition, m_label_size, wxALIGN_RIGHT);
-    //labelSizer->AddStretchSpacer(1);
-    labelSizer->Add(labelText, 0, wxALIGN_CENTER_VERTICAL);
-
-    rowSizer->Add(labelSizer, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    // Color picker
-    auto colorPicker = new wxColourPickerCtrl(parent, wxID_ANY, initialColor);
-    colorPicker->Bind(wxEVT_COLOURPICKER_CHANGED, handler, this);
-    rowSizer->Add(colorPicker, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    rowSizer->AddStretchSpacer(1);
-    parentSizer->Add(rowSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 5);
+	m_fontpicker->SetFont(font);
+		m_sample->SetFont(font);
+		m_sample->SetForegroundColour(wxColour(255, 255, 255));
+		m_sample->SetBackgroundColour(wxColour(0, 0, 0));
+	m_checkbox_top->SetValue(this->m_settings.always_on_top);
+	m_radio_line->SetValue(this->m_settings.is_line_graph);
+	m_txt_mincurrent->SetValue(std::to_string(this->m_settings.min_current));
+	m_cp_5v->SetColour(this->m_settings.color_5v);
+	m_cp_9v->SetColour(this->m_settings.color_9v);
+	m_cp_15v->SetColour(this->m_settings.color_15v);
+	m_cp_20v->SetColour(this->m_settings.color_20v);
+	m_cp_28v->SetColour(this->m_settings.color_28v);
+	m_cp_36v->SetColour(this->m_settings.color_36v);
+	m_cp_48v->SetColour(this->m_settings.color_48v);
 }
 
 void SettingsDialog::OnFontChanged(wxFontPickerEvent &event) {
     wxFont selectedFont = event.GetFont();
-    m_fontPreview->SetFont(selectedFont);
-    m_fontPreview->Refresh();
+    m_sample->SetFont(selectedFont);
+    m_sample->Refresh();
     this->m_settings.volts_amps_font = selectedFont.GetFaceName().ToStdString();
     this->m_settings.volts_font_size = selectedFont.GetPointSize();
     dynamic_cast<MainFrame *>(this->m_mainWindow)->OnFontChanged(selectedFont);
-}
-
-void SettingsDialog::OnColor5V(wxColourPickerEvent &event) {
-    wxColour selectedColor = event.GetColour();
-    m_settings.color_5v = selectedColor;
-}
-
-void SettingsDialog::OnColor9V(wxColourPickerEvent &event) {
-    wxColour selectedColor = event.GetColour();
-    m_settings.color_9v = selectedColor;
-}
-
-void SettingsDialog::OnColor15V(wxColourPickerEvent &event) {
-    wxColour selectedColor = event.GetColour();
-    m_settings.color_15v = selectedColor;
-}
-
-void SettingsDialog::OnColor20V(wxColourPickerEvent &event) {
-    wxColour selectedColor = event.GetColour();
-    m_settings.color_20v = selectedColor;
-}
-
-void SettingsDialog::OnColor28V(wxColourPickerEvent &event) {
-    wxColour selectedColor = event.GetColour();
-    m_settings.color_28v = selectedColor;
-}
-
-void SettingsDialog::OnColor36V(wxColourPickerEvent &event) {
-    wxColour selectedColor = event.GetColour();
-    m_settings.color_36v = selectedColor;
-}
-
-void SettingsDialog::OnColor48V(wxColourPickerEvent &event) {
-    wxColour selectedColor = event.GetColour();
-    m_settings.color_48v = selectedColor;
 }
 
 void SettingsDialog::LoadSettings() {

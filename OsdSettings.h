@@ -19,6 +19,7 @@ public:
     int volts_font_size;
     int amps_font_size;
     int graph_height;
+    unsigned int min_current = 0;
     wxColour color_bg;
     wxColour color_amps;
     wxColour color_none;
