@@ -13,17 +13,16 @@
 #include "SettingsDialog.h"
 
 void OsdSettings::init() {
-    wxDisplay display(static_cast<unsigned int>(0));
-    double scale = display.GetScaleFactor(); // Often returns 2.0 on Retina
+    const wxDisplay display(static_cast<unsigned int>(0));
+    const double scale = display.GetScaleFactor(); // Often returns 2.0 on Retina
 
-    m_log = new wxLogStderr;
     // Default settings
     always_on_top = false;
     is_line_graph = false;
     window_height = 200;
     window_width = 400;
-    volts_font_size = 24 * scale;
-    amps_font_size = 24 * scale;
+    min_current = 0;
+    volts_font_size = amps_font_size = static_cast<int>(static_cast<double>(24) * scale);
 #if TARGET_OS_OSX
     volts_amps_font = "Monaco";
 #elif TARGET_OS_WINDOWS
@@ -48,28 +47,28 @@ wxColour OsdSettings::voltsRgb(PowerDelivery::PD_VOLTS volts) const {
     auto color = wxColour(0xff, 0x33, 0x99);
     switch (volts) {
         case PowerDelivery::PD_NONE:
-            color = (color_none);
+            color = color_none;
             break;
         case PowerDelivery::PD_5V:
-            color = (color_5v);
+            color = color_5v;
             break;
         case PowerDelivery::PD_9V:
-            color = (color_9v);
+            color = color_9v;
             break;
         case PowerDelivery::PD_15V:
-            color = (color_15v);
+            color = color_15v;
             break;
         case PowerDelivery::PD_20V:
-            color = (color_20v);
+            color = color_20v;
             break;
         case PowerDelivery::PD_28V:
-            color = (color_28v);
+            color = color_28v;
             break;
         case PowerDelivery::PD_36V:
-            color = (color_36v);
+            color = color_36v;
             break;
         case PowerDelivery::PD_48V:
-            color = (color_48v);
+            color = color_48v;
             break;
         default:
             // qWarning() << "Unknown voltage enum "<<volts;
@@ -78,7 +77,7 @@ wxColour OsdSettings::voltsRgb(PowerDelivery::PD_VOLTS volts) const {
     return color;
 }
 
-void OsdSettings::saveSettings() {
+void OsdSettings::saveSettings() const {
     wxFileConfig config(wxString(APP_NAME), wxString(APP_COMPANY));
 
     if (!config.HasEntry("always_on_top") || config.ReadBool("always_on_top", always_on_top) != always_on_top) {
@@ -189,7 +188,6 @@ void OsdSettings::loadSettings() {
     if (config->HasEntry("color_48v"))
         color_48v = color_setting(config, "color_48v", color_48v);
     delete config;
-    m_log->LogText("Settings loaded");
 }
 
 wxColour OsdSettings::setting2Rgb(const wxString &setting) {

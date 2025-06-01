@@ -24,9 +24,9 @@
 #include "cmake-build-mingw-release/_deps/wxwidgets-src/include/wx/clrpicker.h"
 #include "wx/fontpicker.h"
 
-class SettingsDialog : public wxDialog {
+class SettingsDialog final : public wxDialog {
 public:
-    SettingsDialog(wxWindow *parent);
+    explicit SettingsDialog(wxWindow *parent);
 
 private:
     void setControlValues();
@@ -43,8 +43,6 @@ private:
 
     void OnDefaults(wxCommandEvent &event);
 
-    void LoadSettings();
-
     void SaveSettings();
 
     OsdSettings m_settings;
@@ -54,33 +52,32 @@ private:
     wxFrame *m_mainWindow = nullptr;
     wxSize m_label_size;
 
-    wxStaticText* m_lbl_font = nullptr;
-    wxFontPickerCtrl* m_fontpicker = nullptr;
-    wxStaticText* m_sample = nullptr;
-    wxStaticText* m_lbl_graph = nullptr;
-    wxRadioButton* m_radio_area = nullptr;
-    wxRadioButton* m_radio_line = nullptr;
-    wxStaticText* m_lbl_window = nullptr;
-    wxCheckBox* m_checkbox_top = nullptr;
-    wxStaticText* m_lbl_mincurrent = nullptr;
-    wxTextCtrl* m_txt_mincurrent = nullptr;
-    wxStaticText* m_ma = nullptr;
-    wxStaticText* m_lbl_c5v = nullptr;
-    wxColourPickerCtrl* m_cp_5v = nullptr;
-    wxStaticText* m_lbl_c9v = nullptr;
-    wxColourPickerCtrl* m_cp_9v = nullptr;
-    wxStaticText* m_lbl_c15v = nullptr;
-    wxColourPickerCtrl* m_cp_15v = nullptr;
-    wxStaticText* m_lbl_c20v = nullptr;
-    wxColourPickerCtrl* m_cp_20v = nullptr;
-    wxStaticText* m_lbl_c28v = nullptr;
-    wxColourPickerCtrl* m_cp_28v = nullptr;
-    wxStaticText* m_lvl_c36v = nullptr;
-    wxColourPickerCtrl* m_cp_36v = nullptr;
-    wxStaticText* m_lbl_c48v = nullptr;
-    wxColourPickerCtrl* m_cp_48v = nullptr;
-    wxStdDialogButtonSizer* m_sdbSizer1 = nullptr;
+    wxStaticText *m_lbl_font = nullptr;
+    wxFontPickerCtrl *m_fontpicker = nullptr;
+    wxStaticText *m_sample = nullptr;
+    wxStaticText *m_lbl_graph = nullptr;
+    wxRadioButton *m_radio_area = nullptr;
+    wxRadioButton *m_radio_line = nullptr;
+    wxStaticText *m_lbl_window = nullptr;
+    wxCheckBox *m_checkbox_top = nullptr;
+    wxStaticText *m_lbl_mincurrent = nullptr;
+    wxTextCtrl *m_txt_mincurrent = nullptr;
+    wxStaticText *m_ma = nullptr;
+    wxStaticText *m_lbl_c5v = nullptr;
+    wxColourPickerCtrl *m_cp_5v = nullptr;
+    wxStaticText *m_lbl_c9v = nullptr;
+    wxColourPickerCtrl *m_cp_9v = nullptr;
+    wxStaticText *m_lbl_c15v = nullptr;
+    wxColourPickerCtrl *m_cp_15v = nullptr;
+    wxStaticText *m_lbl_c20v = nullptr;
+    wxColourPickerCtrl *m_cp_20v = nullptr;
+    wxStaticText *m_lbl_c28v = nullptr;
+    wxColourPickerCtrl *m_cp_28v = nullptr;
+    wxStaticText *m_lvl_c36v = nullptr;
+    wxColourPickerCtrl *m_cp_36v = nullptr;
+    wxStaticText *m_lbl_c48v = nullptr;
+    wxColourPickerCtrl *m_cp_48v = nullptr;
+    wxStdDialogButtonSizer *m_sdbSizer1 = nullptr;
 
     wxDECLARE_EVENT_TABLE();
 };
-

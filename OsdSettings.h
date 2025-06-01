@@ -35,20 +35,16 @@ public:
 
     wxColour voltsRgb(PowerDelivery::PD_VOLTS volts) const;
 
-    std::string voltsStylesheet(PowerDelivery::PD_VOLTS volts) const;
+    void saveSettings() const;
 
-    void saveSettings();
-
-    wxColour color_setting(const wxFileConfig *config, const wxString &key, const wxColour &default_value);
+    static wxColour color_setting(const wxFileConfig *config, const wxString &key, const wxColour &default_value);
 
     void loadSettings();
 
 private:
-    wxColour setting2Rgb(const wxString &setting);
+    static wxColour setting2Rgb(const wxString &setting);
 
-    wxString rgb_to_string(const wxColour &rgb);
-
-    wxLogStderr *m_log = new wxLogStderr;
+    static wxString rgb_to_string(const wxColour &rgb);
 };
 
 #ifndef MAIN

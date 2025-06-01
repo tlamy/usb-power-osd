@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef _AMPMETERAPP_H_
-#define _AMPMETERAPP_H_
-
 #include <wx/frame.h>
 #include <wx/stattext.h>
 
@@ -14,7 +11,7 @@
 #define APP_NAME "USB Meter OSD"
 #define APP_COMPANY "MacWake.de"
 
-class MainFrame : public wxFrame {
+class MainFrame final : public wxFrame {
 public:
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
@@ -64,5 +61,3 @@ private:
     bool m_show_status = true;
 };
 
-
-#endif

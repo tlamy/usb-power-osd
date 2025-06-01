@@ -40,14 +40,73 @@
 #endif
 
 class ceSerial {
+public:
+    static void Delay(unsigned long ms);
+
+    ceSerial();
+
+    ceSerial(const std::string &Device, long BaudRate, long DataSize, char ParityType, float NStopBits);
+
+    ~ceSerial();
+
+    long Open(void); //return 0 if success
+    void Close();
+
+    char ReadChar(bool &success); //return read char if success
+    /**
+     * Read a line from the serial port
+     * @param buffer result buffer
+     * @param size buffer size
+     * @param timeout_ms
+     * @return int Number of chars read (not including newline), or -1 on i/o error, -2 on timeout
+     */
+    int ReadLine(char *buffer, size_t size, int timeout_ms = 1000); //read until newline or timeout
+    bool WriteChar(const char ch); ////return success flag
+    bool Write(const char *data); //write null terminated string and return success flag
+    bool Write(const char *data, long n);
+
+    bool WriteArr(const uint8_t *data, long n);
+
+    bool SetRTS(bool value); //return success flag
+    bool SetDTR(bool value); //return success flag
+    bool GetCTS(bool &success);
+
+    bool GetDSR(bool &success);
+
+    bool GetRI(bool &success);
+
+    bool GetCD(bool &success);
+
+    bool IsOpened();
+
+    void SetPortName(const std::string &Port);
+
+    std::string GetPort();
+
+    void SetBaudRate(long baudrate);
+
+    long GetBaudRate();
+
+    void SetDataSize(long nbits);
+
+    long GetDataSize();
+
+    void SetParity(char p);
+
+    char GetParity();
+
+    void SetStopBits(float nbits);
+
+    float GetStopBits();
+
 private:
-	char rxchar;
-	std::string port;
-	long baud;
-	long dsize;
-	char parity;
-	float stopbits;
-	bool stdbaud;
+    char rxchar;
+    std::string port;
+    long baud;
+    long dsize;
+    char parity;
+    float stopbits;
+    bool stdbaud;
 #ifdef CE_WINDOWS
     HANDLE hComm; //handle
 	OVERLAPPED osReader;
@@ -55,66 +114,7 @@ private:
 	BOOL fWaitingOnRead;
 	COMMTIMEOUTS timeouts_ori;
 #else
-	long fd; //serial_fd
+    long fd; //serial_fd
 #endif
-
-public:
-	static void Delay(unsigned long ms);
-
-	ceSerial();
-
-	ceSerial(std::string Device, long BaudRate, long DataSize, char ParityType, float NStopBits);
-
-	~ceSerial();
-
-	long Open(void); //return 0 if success
-	void Close();
-
-	char ReadChar(bool &success); //return read char if success
-	/**
-	 * Read a line from the serial port
-	 * @param buffer result buffer
-	 * @param size buffer size
-	 * @param timeout_ms
-	 * @return int Number of chars read (not including newline), or -1 on i/o error, -2 on timeout
-	 */
-	int ReadLine(char *buffer, size_t size, int timeout_ms = 1000); //read until newline or timeout
-	bool WriteChar(const char ch); ////return success flag
-	bool Write(const char *data); //write null terminated string and return success flag
-	bool Write(const char *data, long n);
-
-	bool WriteArr(const uint8_t *data, long n);
-
-	bool SetRTS(bool value); //return success flag
-	bool SetDTR(bool value); //return success flag
-	bool GetCTS(bool &success);
-
-	bool GetDSR(bool &success);
-
-	bool GetRI(bool &success);
-
-	bool GetCD(bool &success);
-
-	bool IsOpened();
-
-	void SetPortName(std::string Port);
-
-	std::string GetPort();
-
-	void SetBaudRate(long baudrate);
-
-	long GetBaudRate();
-
-	void SetDataSize(long nbits);
-
-	long GetDataSize();
-
-	void SetParity(char p);
-
-	char GetParity();
-
-	void SetStopBits(float nbits);
-
-	float GetStopBits();
 };
 #endif

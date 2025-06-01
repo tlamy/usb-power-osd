@@ -796,9 +796,8 @@ bool serialib::DTR(bool status) {
     if (status)
         // Set DTR
         return this->setDTR();
-    else
-        // Unset DTR
-        return this->clearDTR();
+    // Unset DTR
+    return this->clearDTR();
 }
 
 
@@ -861,9 +860,8 @@ bool serialib::RTS(bool status) {
     if (status)
         // Set RTS
         return this->setRTS();
-    else
-        // Unset RTS
-        return this->clearRTS();
+    // Unset RTS
+    return this->clearRTS();
 }
 
 
