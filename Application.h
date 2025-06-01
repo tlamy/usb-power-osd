@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _AMPMETERAPP_H_
 #define _AMPMETERAPP_H_
 
@@ -7,18 +9,21 @@
 #include "GraphPanel.h"
 #include "MeasurementEvent.h"
 #include "SerialThread.h"
+#include "SettingsDialog.h"
 
 #define APP_NAME "USB Meter OSD"
 #define APP_COMPANY "MacWake.de"
 
-class MyFrame : public wxFrame {
+class MainFrame : public wxFrame {
 public:
-    MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
+    MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
     // Menu callbacks
     void Exit(wxCommandEvent &event);
 
     void About(wxCommandEvent &event);
+
+    void OnOpenSettings(wxCommandEvent &event);
 
     void Help(wxCommandEvent &event);
 
@@ -26,15 +31,21 @@ public:
 
     void ToggleLineGraph(wxCommandEvent &event);
 
+    void OnGrapthTypeChanged(bool isLineGraph);
+
     void OnStatusUpdate(const wxThreadEvent &event);
 
     void OnDataUpdate(wxThreadEvent &event);
 
+    void OnFontChanged(const wxFont & wx_font);
+
+    void OnAlwaysOnTopChanged(bool always_on_top);
+
 private:
     wxFont *m_volts_font;
     wxFont *m_amps_font;
-    GraphPanel::graph_style_t m_graph_style = GraphPanel::STYLE_BAR;
-    bool m_alwaysontop = false;
+    GraphPanel::graph_style_t m_graph_style;
+    bool m_alwaysontop;
     wxStaticText *m_status_text;
     wxStaticText *m_voltage;
     wxStaticText *m_current;
@@ -45,6 +56,7 @@ private:
     enum MenuCommands {
         ALWAYSONTOP = 10,
         LINEGRAPH,
+        SETTINGS,
     };
 
     SerialThread *serial_thread;

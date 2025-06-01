@@ -12,6 +12,7 @@
 class OsdSettings {
 public:
     bool always_on_top;
+    bool is_line_graph = false;
     int window_height;
     int window_width;
     std::string volts_amps_font;

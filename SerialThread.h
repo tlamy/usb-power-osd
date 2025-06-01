@@ -1,6 +1,7 @@
 #ifndef SERIALTHREAD_H
 #define SERIALTHREAD_H
 
+#include <wx/event.h>
 #include <wx/thread.h>
 
 

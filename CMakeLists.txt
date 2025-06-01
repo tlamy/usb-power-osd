@@ -91,6 +91,8 @@ set(SRCS
         Events.cpp
         MeasurementEvent.cpp
         MeasurementEvent.h
+        SettingsDialog.cpp
+        SettingsDialog.h
 )
 
 if(APPLE)

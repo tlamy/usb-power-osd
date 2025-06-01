@@ -28,7 +28,7 @@ public:
 private:
     void OnPaint(wxPaintEvent &event);
 
-    bool m_graph_style = STYLE_BAR;
+    bool m_graph_style;
     std::deque<int> m_currents;
     std::deque<PowerDelivery::PD_VOLTS> m_voltages;
     int m_maxBarValue = 1;
