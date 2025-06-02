@@ -49,7 +49,9 @@ jobs:
       - name: Organize artifacts for release
         run: |
           mkdir -p dist
-          find ./artifacts -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} dist/ \;
+          tar cvfz dist/usb-power-meter.tar.gz -C artifacts/linux-build .
+          mv artifacts/macos-build artifacts/UsbPowerOsd.app && cd artifacts && zip -r ${{github.workspace}}/dist/USB-Power-Meter_macOS.zip . && cd ${{github.workspace}}
+          cp artifacts/windows-build/usbc-power-osd.exe dist/
           ls -la dist/
 
       - name: Run semantic release
