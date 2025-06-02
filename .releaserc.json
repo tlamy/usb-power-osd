@@ -21,6 +21,10 @@
             "label": "macOS Application (DMG)"
           },
           {
+            "path": "dist/*macOS.zip",
+            "label": "macOS Application (ZIP)"
+          },
+          {
             "path": "dist/*.exe",
             "label": "Windows Executable (EXE)"
           },
