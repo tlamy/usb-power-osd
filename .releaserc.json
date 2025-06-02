@@ -1,7 +1,6 @@
 {
   "branches": [
-    "main",
-    "master"
+    "main"
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",
@@ -23,7 +22,7 @@
           },
           {
             "path": "dist/*.exe",
-            "label": "Windows Installer (EXE)"
+            "label": "Windows Executable (EXE)"
           },
           {
             "path": "dist/*.msi",
