@@ -5,9 +5,9 @@
 
 wxDECLARE_EVENT(wxEVT_MEASUREMENT, wxThreadEvent);
 
-class MeasurementEvent : public wxThreadEvent {
+class MeasurementEvent final : public wxThreadEvent {
 public:
-    MeasurementEvent(int millivolts, int milliamps)
+    MeasurementEvent(const int millivolts, const int milliamps)
         : wxThreadEvent(wxEVT_MEASUREMENT), m_millivolts(millivolts), m_milliamps(milliamps) {
     }
 

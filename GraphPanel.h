@@ -10,7 +10,7 @@
 #include "wx/panel.h"
 
 
-class GraphPanel : public wxPanel {
+class GraphPanel final : public wxPanel {
 public:
     GraphPanel(wxWindow *parent, wxSize size);
 
@@ -28,15 +28,15 @@ public:
 private:
     void OnPaint(wxPaintEvent &event);
 
-    bool m_graph_style = STYLE_BAR;
+    bool m_graph_style;
     std::deque<int> m_currents;
     std::deque<PowerDelivery::PD_VOLTS> m_voltages;
     int m_maxBarValue = 1;
     int m_size;
     int m_current_min = 0;
     int m_current_max = 0;
-    static int max(const std::deque<int>& deque);
 
+    static int maxDequeueItem(const std::deque<int> &deque);
 };
 
 

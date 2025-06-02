@@ -15,7 +15,7 @@
 
 enum FrameType { OSD_MODE_20V = 20, OSD_MODE_28V = 28 };
 
-static int8_t hex2bin(unsigned char c) {
+static int8_t hex2bin(const unsigned char c) {
     if (c >= '0' && c <= '9') {
         return c - '0'; // NOLINT(*-narrowing-conversions)
     }
@@ -33,7 +33,6 @@ static int16_t hex4_to_uint16(const char *buf) {
                         (hex2bin(buf[2]) << 4) | hex2bin(buf[3]);
     return val;
 }
-
 
 
 void SerialThread::updateStatus(const wxString &status) {
@@ -121,12 +120,11 @@ bool SerialThread::measure_loop(const std::string &device) {
             bus_voltage /= 8.0;
 
 
-        int milliamps = abs((int) (static_cast<double>(shunt_voltage) * current_quanta));
+        int milliamps = abs(static_cast<int>(static_cast<double>(shunt_voltage) * current_quanta));
         int millivolts = static_cast<int>(bus_voltage * voltage_quanta);
 
         if (TestDestroy()) break;
-        MeasurementEvent *event;
-        event = new MeasurementEvent(millivolts, milliamps);
+        auto event = new MeasurementEvent(millivolts, milliamps);
         wxQueueEvent(this->m_frame, event);
     }
     if (!TestDestroy()) {
@@ -144,7 +142,7 @@ wxThread::ExitCode SerialThread::Entry() {
         if (TestDestroy())
             break;
 
-        for (const auto& port: enumerator->GetPortNames()) {
+        for (const auto &port: enumerator->GetPortNames()) {
             updateStatus(wxString::Format("Trying %s",
                                           std::filesystem::path(std::string(port.c_str())).filename().string()
             ));
@@ -152,7 +150,7 @@ wxThread::ExitCode SerialThread::Entry() {
         }
         delete enumerator;
         updateStatus("Waiting for device");
-        wxThread::Sleep(1000);
+        Sleep(1000);
     }
-    return (wxThread::ExitCode) nullptr;
+    return nullptr;
 }

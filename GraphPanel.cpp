@@ -4,15 +4,15 @@
 #include "OsdSettings.h"
 #include "wx/txtstrm.h"
 
-// Custom panel for drawing a graph
-GraphPanel::GraphPanel(wxWindow* parent, wxSize size) : wxPanel(parent, wxID_ANY)
-{
+GraphPanel::GraphPanel(wxWindow *parent, const wxSize size) : wxPanel(parent, wxID_ANY) {
     // Set minimum size for the graph panel
     // wxWindowBase::SetMinSize(size);
     // wxWindowBase::SetMaxSize(size);
     this->m_size = size.x;
     this->m_currents.resize(size.x, 0);
     this->m_voltages.resize(size.x, PowerDelivery::PD_NONE);
+
+    this->m_graph_style = settings.is_line_graph ? STYLE_LINE : STYLE_BAR;
 
     // Set background color
     //wxWindow::SetBackgroundColour(settings.color_bg);
@@ -22,15 +22,12 @@ GraphPanel::GraphPanel(wxWindow* parent, wxSize size) : wxPanel(parent, wxID_ANY
     Bind(wxEVT_PAINT, &GraphPanel::OnPaint, this);
 }
 
-void GraphPanel::add(int current, PowerDelivery::PD_VOLTS voltage)
-{
-    if (this->m_currents.size() != this->m_size)
-    {
+void GraphPanel::add(const int current, const PowerDelivery::PD_VOLTS voltage) {
+    if (this->m_currents.size() != this->m_size) {
         this->m_currents.resize(this->m_size);
         this->m_voltages.resize(this->m_size);
     }
-    if (voltage == PowerDelivery::PD_NONE)
-    {
+    if (voltage == PowerDelivery::PD_NONE) {
         return;
     }
     this->m_currents.pop_front();
@@ -38,93 +35,74 @@ void GraphPanel::add(int current, PowerDelivery::PD_VOLTS voltage)
     this->m_voltages.pop_front();
     this->m_voltages.push_back(voltage);
 
-    this->m_current_max = GraphPanel::max(this->m_currents);
-    if (this->m_current_max >=500)
-    {
+    this->m_current_max = maxDequeueItem(this->m_currents);
+    if (this->m_current_max >= 500) {
         this->m_maxBarValue = (this->m_current_max / 1000 + 1) * 1000;
-    } else if (this->m_current_max >= 250)
-    {
+    } else if (this->m_current_max >= 250) {
         this->m_maxBarValue = 500;
-    } else if (this->m_current_max >= 100)
-    {
+    } else if (this->m_current_max >= 100) {
         this->m_maxBarValue = 250;
-    } else
-    {
+    } else {
         this->m_maxBarValue = 100;
     }
 
     int minCurrent = this->m_current_max;
-    for (auto current : this->m_currents)
-    {
-        if (current > 0 && current < minCurrent)
-        {
-            minCurrent = current;
+    for (const auto c: this->m_currents) {
+        if (c > 0 && c < minCurrent) {
+            minCurrent = c;
         }
     }
 
     this->m_current_min = minCurrent;
 
-    if (IsShown())
-    {
+    if (IsShown()) {
         Refresh(false);
     }
     Update();
 }
 
-void GraphPanel::SetGraphStyle(graph_style_t style)
-{
+void GraphPanel::SetGraphStyle(const graph_style_t style) {
     this->m_graph_style = style;
-    if (IsShown())
-    {
+    if (IsShown()) {
         Refresh(false);
     }
 }
 
-void GraphPanel::GetMinMaxCurrent(int* min, int* max) const
-{
+void GraphPanel::GetMinMaxCurrent(int *min, int *max) const {
     *min = this->m_current_min;
     *max = this->m_current_max;
 }
 
-void GraphPanel::OnPaint(wxPaintEvent& event)
-{
+void GraphPanel::OnPaint(wxPaintEvent &event) {
     wxPaintDC dc(this);
 
     int width, height;
     GetClientSize(&width, &height);
 
-    if (this->m_currents.size() != width)
-    {
+    if (this->m_currents.size() != width) {
         this->m_currents.resize(width);
         this->m_voltages.resize(width);
         this->m_size = width;
     }
 
     // Skip if no data or invalid dimensions
-    if (width <= 2 || height <= 2)
-    {
+    if (width <= 2 || height <= 2) {
         std::cerr << "Bad client size " << width << "x" << height << std::endl;
         return;
     }
 
-    this->m_current_max = GraphPanel::max(this->m_currents);
+    this->m_current_max = maxDequeueItem(this->m_currents);
     wxPoint prevPoint;
-    for (int i = 0; i < this->m_size; ++i)
-    {
+    for (int i = 0; i < this->m_size; ++i) {
         auto pd_volts = this->m_voltages.at(i);
         wxColour colour = settings.voltsRgb(pd_volts);
-        if (i > 1)
-        {
+        if (i > 1) {
             auto pd_volts2 = this->m_voltages.at(i - 1);
-            if (pd_volts2 != pd_volts && pd_volts2 != PowerDelivery::PD_20V)
-            {
+            if (pd_volts2 != pd_volts && pd_volts2 != PowerDelivery::PD_20V) {
                 colour = settings.voltsRgb(pd_volts2);
-            }
-            else if (i < this->m_size - 1)
-            {
+            } else if (i < this->m_size - 1) {
                 pd_volts2 = this->m_voltages.at(i + 1);
-                if (pd_volts2 != pd_volts && pd_volts2 != PowerDelivery::PD_20V)
-                {
+                if (pd_volts2 != pd_volts && pd_volts2 != PowerDelivery::PD_20V) {
                     colour = settings.voltsRgb(pd_volts2);
                 }
             }
@@ -133,17 +111,13 @@ void GraphPanel::OnPaint(wxPaintEvent& event)
         dc.SetPen(wxPen(colour, 1));
         dc.SetBrush(wxBrush(colour)); // Add this line for filled rectangles
 
-        int barHeight = (height * this->m_currents.at(i)) / this->m_maxBarValue;
-        if (this->m_graph_style == STYLE_BAR)
-        {
+        int barHeight = height * this->m_currents.at(i) / this->m_maxBarValue;
+        if (this->m_graph_style == STYLE_BAR) {
             dc.DrawLine(i, height - barHeight, i, height);
             //dc.DrawRectangle(i, height - barHeight, 1, barHeight);
-        }
-        else
-        {
+        } else {
             // For lines, only pen is needed
-            if (i > 0)
-            {
+            if (i > 0) {
                 dc.DrawLine(prevPoint.x, prevPoint.y, i, height - barHeight);
             }
             prevPoint = wxPoint(i, height - barHeight);
@@ -151,13 +125,10 @@ void GraphPanel::OnPaint(wxPaintEvent& event)
     }
 }
 
-int GraphPanel::max(const std::deque<int>& deque)
-{
+int GraphPanel::maxDequeueItem(const std::deque<int> &deque) {
     int max = 0;
-    for (auto current : deque)
-    {
-        if (current > max)
-        {
+    for (auto current: deque) {
+        if (current > max) {
             max = current;
         }
     }

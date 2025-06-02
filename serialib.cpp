@@ -19,6 +19,8 @@ This is a licence-free software, it can be used by anyone who try to build a bet
 // ReSharper disable CppDFAConstantParameter
 // ReSharper disable CppDFAConstantConditions
 #include "serialib.h"
+#include "SerialThread.h"
+#include "wx/utils.h"
 
 
 //_____________________________________
@@ -37,8 +39,8 @@ serialib::serialib() {
     timeouts = new COMMTIMEOUTS;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
-    currentStateRTS=true;
-    currentStateDTR=true;
+    currentStateRTS = true;
+    currentStateDTR = true;
     fd = -1;
 #endif
 }
@@ -619,6 +621,9 @@ int serialib::readString(char *receivedString, char finalChar, unsigned int maxN
 
     // While the buffer is not full
     while (nbBytes < maxNbBytes) {
+        if (this->available() == 0) {
+            wxMilliSleep(50);
+        }
         // Compute the TimeOut for the next call of ReadChar
         timeOutParam = timeOut_ms - timer.elapsedTime_ms();
 
@@ -791,9 +796,8 @@ bool serialib::DTR(bool status) {
     if (status)
         // Set DTR
         return this->setDTR();
-    else
-        // Unset DTR
-        return this->clearDTR();
+    // Unset DTR
+    return this->clearDTR();
 }
 
 
@@ -856,9 +860,8 @@ bool serialib::RTS(bool status) {
     if (status)
         // Set RTS
         return this->setRTS();
-    else
-        // Unset RTS
-        return this->clearRTS();
+    // Unset RTS
+    return this->clearRTS();
 }
 
 

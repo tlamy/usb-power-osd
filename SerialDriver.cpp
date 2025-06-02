@@ -64,7 +64,7 @@ ceSerial::ceSerial() :
 {
 }
 
-ceSerial::ceSerial(std::string Device, long BaudRate, long DataSize, char ParityType,
+ceSerial::ceSerial(const std::string &Device, long BaudRate, long DataSize, char ParityType,
                    float NStopBits): stdbaud(true) {
 #ifdef CE_WINDOWS
 	hComm = INVALID_HANDLE_VALUE;
@@ -82,7 +82,7 @@ ceSerial::~ceSerial() {
     Close();
 }
 
-void ceSerial::SetPortName(std::string Device) {
+void ceSerial::SetPortName(const std::string &Device) {
     port = Device;
 }
 
@@ -443,7 +443,7 @@ bool ceSerial::GetCD(bool& success) {
 
 #else  //for POSIX
 
-long ceSerial::Open(void) {
+long ceSerial::Open() {
 #ifdef WE_LINUX
 	struct serial_struct serinfo;
 #endif
@@ -613,7 +613,7 @@ int ceSerial::ReadLine(char *buffer, size_t size, int timeout_ms) {
 
     // Calculate total timeout end time
     struct timeval end_time;
-    gettimeofday(&end_time, NULL);
+    gettimeofday(&end_time, nullptr);
     end_time.tv_sec += timeout_ms / 1000;
     end_time.tv_usec += (timeout_ms % 1000) * 1000;
     if (end_time.tv_usec >= 1000000) {
@@ -624,7 +624,7 @@ int ceSerial::ReadLine(char *buffer, size_t size, int timeout_ms) {
     while (bytes_read < size - 1) {
         // Calculate remaining timeout
         struct timeval now;
-        gettimeofday(&now, NULL);
+        gettimeofday(&now, nullptr);
 
         if (now.tv_sec > end_time.tv_sec ||
             (now.tv_sec == end_time.tv_sec && now.tv_usec >= end_time.tv_usec)) {
@@ -645,7 +645,7 @@ int ceSerial::ReadLine(char *buffer, size_t size, int timeout_ms) {
         FD_SET(fd, &readfds);
 
         // Wait for data to become available
-        int select_result = select(fd + 1, &readfds, NULL, NULL, &tv);
+        int select_result = select(fd + 1, &readfds, nullptr, nullptr, &tv);
 
         if (select_result < 0) {
             // Error in select()
@@ -707,7 +707,7 @@ bool ceSerial::WriteArr(const uint8_t *data, long n) {
 }
 
 bool ceSerial::WriteChar(const char ch) {
-    return Write((char *) &ch, 1);
+    return Write(&ch, 1);
 }
 
 bool ceSerial::SetRTS(bool value) {
