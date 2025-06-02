@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/tlamy/usb-power-osd/compare/v1.0.1...v1.0.2) (2025-06-02)
+
+
+### Bug Fixes
+
+* fixed macOS release problems by releasing a .dmg instead of zip ([c112327](https://github.com/tlamy/usb-power-osd/commit/c112327e2fceae313ecbe8ae46f4299a888a174c))
+* fixed wrong path in macOS release script ([c433533](https://github.com/tlamy/usb-power-osd/commit/c4335334252494e597232ec626f9f106d880820f))
+
 ## [1.0.1](https://github.com/tlamy/usb-power-osd/compare/v1.0.0...v1.0.1) (2025-06-02)
 
 
