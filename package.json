@@ -1,6 +1,6 @@
 {
   "name": "usb-power-osd",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "On Screen Display for USB-C Power Meter (compatible to PLD's)",
   "main": "index.js",
   "scripts": {
