@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p dist
           tar cvfz dist/usb-power-meter.tar.gz -C artifacts/linux-build .
-          mv artifacts/macos-build artifacts/UsbPowerOsd.app && cd artifacts && zip -r ${{github.workspace}}/dist/USB-Power-Meter_macOS.zip UsbPowerOsd.app && cd ${{github.workspace}}
+          cp artifacts/macos-build artifacts/USB-Power-OSD.dmg dist/
           cp artifacts/windows-build/usbc-power-osd.exe dist/
           ls -la dist/
 

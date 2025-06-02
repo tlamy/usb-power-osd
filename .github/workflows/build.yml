@@ -118,16 +118,22 @@ jobs:
         run: |
           # Create a ZIP archive of the app
           ditto -c -k --keepParent "${{github.workspace}}/build/usbc-power-osd.app" "${{github.workspace}}/build/usbc-power-osd.zip"
-          
+
           # Notarize the app
           xcrun notarytool submit "${{github.workspace}}/build/usbc-power-osd.zip" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_ID_PASSWORD" \
             --team-id "${{vars.APPLE_TEAM_ID}}" \
             --wait
-          
+
           # Staple the notarization ticket
           xcrun stapler staple "${{github.workspace}}/build/usbc-power-osd.app"
+
+      - name: Create macOS package
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Create a DMG
+          hdiutil create -volname "USB Power OSD" -srcfolder "${{github.workspace}}/build/usbc-power-osd.app" -ov -format UDZO "${{github.workspace}}/build/USB-Power-OSD.dmg"
 
       - name: Upload Windows artifacts
         if: matrix.os == 'windows-cross'
@@ -142,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: ${{github.workspace}}/build/usbc-power-osd.app
+          path: ${{github.workspace}}/build/USB-Power-OSD.dmg
           if-no-files-found: error
 
       - name: Upload Linux artifacts
