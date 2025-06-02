@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/tlamy/usb-power-osd/compare/v1.0.0...v1.0.1) (2025-06-02)
+
+
+### Bug Fixes
+
+* Fixed release script w/ re to macOs executable ([d318f5a](https://github.com/tlamy/usb-power-osd/commit/d318f5aeb51f6b900b98290b873c7496cc6e4aaf))
+
 # 1.0.0 (2025-06-02)
 
 
