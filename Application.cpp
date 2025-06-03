@@ -83,7 +83,9 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
     this->m_voltage = new wxStaticText(panel, wxID_ANY, "---");
     this->m_current = new wxStaticText(panel, wxID_ANY, "---");
     this->m_watts = new wxStaticText(panel, wxID_ANY, "");
-    this->m_current_minmax = new wxStaticText(panel, wxID_ANY, "<");
+    this->m_amphours = new wxStaticText(panel, wxID_ANY, "---", wxDefaultPosition, wxSize(size.GetWidth() / 2, -1),
+                                        wxALIGN_RIGHT);
+    this->m_current_minmax = new wxStaticText(panel, wxID_ANY, "");
 
     // (Optional) You can also set font or style:
     wxFont font(fontSize, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
@@ -96,6 +98,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
     this->m_current->SetFont(font);
     this->m_current_minmax->SetFont(minMaxFont);
     this->m_watts->SetFont(minMaxFont);
+    this->m_amphours->SetFont(minMaxFont);
 
     this->m_status_text = new wxStaticText(panel, wxID_ANY, "Starting up", wxDefaultPosition,
                                            wxSize(size.x, wxDefaultCoord), wxALIGN_CENTER_HORIZONTAL);
@@ -127,9 +130,22 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 
     mainSizer->Add(this->m_status_text, 0, wxEXPAND | wxALL, 0);
 
+    auto amphourSizer = new wxBoxSizer(wxHORIZONTAL);
+
+    m_resetButton = new wxButton(panel, wxID_ANY, wxT("Reset"));
+    m_resetButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &event) {
+        this->m_last_timestamp = wxMilliClockToLong(wxGetLocalTimeMillis());
+        this->m_milliamphours = 0.0;
+        this->m_amphours->SetLabel("Reset");
+    });
+
+    amphourSizer->Add(m_resetButton, 0, 0, 5);
+    amphourSizer->AddStretchSpacer(1);
+    amphourSizer->Add(this->m_amphours, 0, 0, 5);
     // Add a stretch spacer to push everything to the top
     //mainSizer->AddStretchSpacer(1);
 
+    mainSizer->Add(amphourSizer, 1, wxEXPAND | wxALL, 0);
     mainSizer->Add(m_graph_panel, 1, wxEXPAND | wxALL, 0);
 
     // Set the sizer for the panel
@@ -221,6 +237,19 @@ void MainFrame::OnDataUpdate(wxThreadEvent &event) {
     this->m_current_minmax->SetLabel(min_str);
     if (theEvent->GetMilliVolts() > 500 && theEvent->GetMilliAmps() >= settings.min_current) {
         this->m_graph_panel->add(theEvent->GetMilliAmps(), voltage);
+        auto now = wxMilliClockToLong(wxGetLocalTimeMillis());
+        if (this->m_last_timestamp > 0 &&
+            (now > this->m_last_timestamp + 2000 || now < this->m_last_timestamp)) {
+            this->m_last_timestamp = now;
+        }
+        if (this->m_last_timestamp < now) {
+            auto timeDiffMillis = now - m_last_timestamp;
+            auto hours = static_cast<double>(timeDiffMillis) * static_cast<double>(theEvent->GetMilliAmps()) /
+                         3600000.0;
+            this->m_milliamphours += hours;
+            this->m_last_timestamp = now;
+        }
+        this->m_amphours->SetLabel(wxString::Format("%0.1fmAh", this->m_milliamphours));
     }
 }
 
