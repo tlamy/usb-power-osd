@@ -48,7 +48,9 @@ private:
     wxStaticText *m_current;
     wxStaticText *m_current_minmax;
     wxStaticText *m_watts;
+    wxStaticText *m_amphours;
     GraphPanel *m_graph_panel;
+    wxButton * m_resetButton;
 
     enum MenuCommands {
         ALWAYSONTOP = 10,
@@ -59,4 +61,6 @@ private:
     SerialThread *serial_thread;
     wxMenuBar *m_menuBar;
     bool m_show_status = true;
+    double m_milliamphours = 0.0;
+    long m_last_timestamp;
 };
