@@ -51,11 +51,17 @@ bool SerialThread::measure_loop(const std::string &device) {
     auto port = new serialib();
     char code;
     if ((code = port->openDevice(device.c_str(), 9600)) != 1) {
-        std::cerr << "Failed to open" << device << " return code=" << code << std::endl;
-        return false;
+      std::cerr << "Failed to open" << device << " return code=" << code
+                << std::endl;
+      return false;
     }
+
+    // ReSharper disable once CppExpressionWithoutSideEffects
+    port->flushReceiver();  // Puffer leeren
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
     char line[100];
-    int bytes_read = port->readString(line, '\n', 100, 1000);
+    int bytes_read = port->readString(line, '\n', 100, 5000);
     if (bytes_read < 0) {
         std::cerr << "Read error" << std::endl;
         return false;
