@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/tlamy/usb-power-osd/compare/v1.0.2...v1.0.3) (2025-06-04)
+
+
+### Bug Fixes
+
+* Windows build should be fully static ([156bd78](https://github.com/tlamy/usb-power-osd/commit/156bd785ff63154ca5a2d3e9a7ddc6c88fb2ec27))
+
 ## [1.0.2](https://github.com/tlamy/usb-power-osd/compare/v1.0.1...v1.0.2) (2025-06-02)
 
 
