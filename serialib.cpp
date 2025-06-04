@@ -19,6 +19,10 @@ This is a licence-free software, it can be used by anyone who try to build a bet
 // ReSharper disable CppDFAConstantParameter
 // ReSharper disable CppDFAConstantConditions
 #include "serialib.h"
+
+#include <iostream>
+#include <bits/ostream.tcc>
+
 #include "SerialThread.h"
 #include "wx/utils.h"
 
@@ -609,63 +613,43 @@ int serialib::readStringNoTimeOut(char *receivedString, char finalChar, unsigned
   */
 int serialib::readString(char *receivedString, char finalChar, unsigned int maxNbBytes, unsigned int timeOut_ms,
                          bool stripFinalChar) const {
-    // Check if timeout is requested
     if (timeOut_ms == 0) return readStringNoTimeOut(receivedString, finalChar, maxNbBytes);
 
-    // Number of bytes read
     unsigned int nbBytes = 0;
-    // Character read on serial device
     char charRead;
-    // Timer used for timeout
     timeOut timer;
     long int timeOutParam;
 
-    // Initialize the timer (for timeout)
     timer.initTimer();
 
-    // While the buffer is not full
     while (nbBytes < maxNbBytes) {
-        if (this->available() == 0) {
-            wxMilliSleep(50);
-        }
-        // Compute the TimeOut for the next call of ReadChar
+        // Compute timeout first
         timeOutParam = timeOut_ms - timer.elapsedTime_ms();
-
-        // If there is time remaining
-        if (timeOutParam > 0) {
-            // Wait for a byte on the serial link with the remaining time as timeout
-            charRead = readChar(&receivedString[nbBytes], timeOutParam);
-
-            // If a byte has been received
-            if (charRead == 1) {
-                // Check if the character received is the final one
-                if (receivedString[nbBytes] == finalChar) {
-                    if (stripFinalChar) {
-                        nbBytes--;
-                    }
-                    // Final character: add the end character 0
-                    receivedString[++nbBytes] = 0;
-                    // Return the number of bytes read
-                    return nbBytes;
-                }
-                // This is not the final character, just increase the number of bytes read
-                nbBytes++;
-            }
-            // Check if an error occured during reading char
-            // If an error occurend, return the error number
-            if (charRead < 0) return charRead;
-        }
-        // Check if timeout is reached
-        if (timer.elapsedTime_ms() > timeOut_ms) {
-            // Add the end caracter
+        
+        if (timeOutParam <= 0) {
+            // Timeout reached
             receivedString[nbBytes] = 0;
-            // Return 0 (timeout reached)
             return 0;
+        }
+
+        // Wait for a byte with proper timeout
+        charRead = readChar(&receivedString[nbBytes], timeOutParam);
+
+        if (charRead == 1) {
+            if (receivedString[nbBytes] == finalChar) {
+                if (stripFinalChar) {
+                    nbBytes--;
+                }
+                receivedString[++nbBytes] = 0;
+                return nbBytes;
+            }
+            nbBytes++;
+        } else if (charRead < 0) {
+            return charRead;
         }
     }
 
-    // Buffer is full : return -3
-    return -3;
+    return -3;  // Buffer full
 }
 
 
