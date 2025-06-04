@@ -21,11 +21,13 @@ This is a licence-free software, it can be used by anyone who try to build a bet
 #include "serialib.h"
 
 #include <iostream>
-#include <bits/ostream.tcc>
 
 #include "SerialThread.h"
 #include "wx/utils.h"
 
+#if defined (_WIN32) || defined( _WIN64)
+#include <bits/ostream.tcc>
+#endif
 
 //_____________________________________
 // ::: Constructors and destructors :::
