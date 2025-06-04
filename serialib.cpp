@@ -617,7 +617,7 @@ int serialib::readString(char *receivedString, char finalChar, unsigned int maxN
                          bool stripFinalChar) const {
     if (timeOut_ms == 0) return readStringNoTimeOut(receivedString, finalChar, maxNbBytes);
 
-    unsigned int nbBytes = 0;
+    int nbBytes = 0;
     char charRead;
     timeOut timer;
     long int timeOutParam;
@@ -628,6 +628,14 @@ int serialib::readString(char *receivedString, char finalChar, unsigned int maxN
         // Compute timeout first
         timeOutParam = timeOut_ms - timer.elapsedTime_ms();
         
+        if (timeOutParam <= 0) {
+            // Timeout reached
+            receivedString[nbBytes] = 0;
+            return 0;
+        }
+        while (!available() && timeOut_ms - timer.elapsedTime_ms() > 0) {
+            wxMilliSleep(25);
+        }
         if (timeOutParam <= 0) {
             // Timeout reached
             receivedString[nbBytes] = 0;
