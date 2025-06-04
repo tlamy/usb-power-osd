@@ -82,6 +82,8 @@ jobs:
           -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
           -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
           -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+          -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++ -static" \
+          -DCMAKE_CXX_FLAGS="-DSTATIC_BUILD"
 
       - name: Configure CMake (Non-Windows)
         if: matrix.os != 'windows-cross'
