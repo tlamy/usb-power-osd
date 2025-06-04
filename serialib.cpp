@@ -221,6 +221,9 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
     // configure parity
     dcbSerialParams.Parity = parity;
 
+    dcbSerialParams.fBinary = TRUE;
+    dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
+
     // Write the parameters
     if(!SetCommState(hSerial, &dcbSerialParams)) return -5;
 
@@ -237,7 +240,8 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
     // Write the parameters
     if (!SetCommTimeouts(hSerial, timeouts)) return -6;
 
-    // Opening successfull
+    // Opening successful
+    std::cerr << "Open successful" <<std::endl;
     return 1;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
