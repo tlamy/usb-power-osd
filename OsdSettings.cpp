@@ -19,6 +19,7 @@ void OsdSettings::init() {
     // Default settings
     always_on_top = false;
     is_line_graph = false;
+    is_charge_enabled = false;
     window_height = 200;
     window_width = 400;
     min_current = 0;
@@ -82,6 +83,9 @@ void OsdSettings::saveSettings() const {
 
     if (!config.HasEntry("always_on_top") || config.ReadBool("always_on_top", always_on_top) != always_on_top) {
         config.Write("always_on_top", always_on_top);
+    }
+    if (!config.HasEntry("is_charge_enabled") || config.ReadBool("is_charge_enabled", always_on_top) != always_on_top) {
+        config.Write("is_charge_enabled", is_charge_enabled);
     }
     if (!config.HasEntry("is_line_graph") || config.ReadBool("is_line_graph", is_line_graph) != always_on_top) {
         config.Write("is_line_graph", is_line_graph);
@@ -155,6 +159,8 @@ void OsdSettings::loadSettings() {
     auto config = new wxFileConfig(APP_NAME, APP_COMPANY);
     if (config->HasEntry("always_on_top"))
         always_on_top = config->ReadBool("always_on_top", always_on_top);
+    if (config->HasEntry("is_charge_enabled"))
+        is_charge_enabled = config->ReadBool("is_charge_enabled", is_charge_enabled);
     if (config->HasEntry("is_line_graph"))
         is_line_graph = config->ReadBool("is_line_graph", is_line_graph);
     if (config->HasEntry("window_height"))

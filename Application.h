@@ -25,6 +25,7 @@ public:
     void Help(wxCommandEvent &event);
 
     void ToggleOnTop(wxCommandEvent &event);
+    void ToggleCharge(wxCommandEvent &event);
 
     void ToggleLineGraph(wxCommandEvent &event);
 
@@ -37,8 +38,9 @@ public:
     void OnFontChanged(const wxFont &wx_font);
 
     void OnAlwaysOnTopChanged(bool always_on_top);
+    void OnChargeSettingChanged(bool is_charge_enabled);
 
-private:
+  private:
     wxFont *m_volts_font;
     wxFont *m_amps_font;
     GraphPanel::graph_style_t m_graph_style;
@@ -48,10 +50,13 @@ private:
     wxStaticText *m_current;
     wxStaticText *m_current_minmax;
     wxStaticText *m_watts;
+    wxStaticText *m_amphours;
     GraphPanel *m_graph_panel;
+    wxButton * m_resetButton;
 
     enum MenuCommands {
         ALWAYSONTOP = 10,
+        CHARGE_ENABLED,
         LINEGRAPH,
         SETTINGS,
     };
@@ -59,4 +64,7 @@ private:
     SerialThread *serial_thread;
     wxMenuBar *m_menuBar;
     bool m_show_status = true;
+    double m_milliamphours = 0.0;
+    long m_last_timestamp = 0;
+    wxBoxSizer *m_amphourSizer;
 };
