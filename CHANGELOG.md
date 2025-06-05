@@ -1,3 +1,13 @@
+## [1.0.4](https://github.com/tlamy/usb-power-osd/compare/v1.0.3...v1.0.4) (2025-06-05)
+
+
+### Bug Fixes
+
+* fixed macOS build ([7d6c1a3](https://github.com/tlamy/usb-power-osd/commit/7d6c1a3b8641e4a7dc540aac4d67ca4f5e06a9d7))
+* readded cpu friendly waiting for data on serial port ([fbab642](https://github.com/tlamy/usb-power-osd/commit/fbab642020db132b907e4b244f2d6ccb0ebe65b7))
+* **Windows:** Do not reset MCU on every connect ([b707973](https://github.com/tlamy/usb-power-osd/commit/b7079737e6ee74e63a71f986a025e9f8d1aa89b1))
+* **Windows:** fixed read looping resulting in application crash ([35f1d11](https://github.com/tlamy/usb-power-osd/commit/35f1d1132cfde7e3d2c12317c14f30cf7987c8ae))
+
 ## [1.0.3](https://github.com/tlamy/usb-power-osd/compare/v1.0.2...v1.0.3) (2025-06-04)
 
 
