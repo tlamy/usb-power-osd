@@ -45,6 +45,8 @@ private:
 
     void SaveSettings();
 
+    wxStaticText *createLabel(wxBoxSizer *sizer, const wxString &labelText);
+
     OsdSettings m_settings;
 
     wxFontPickerCtrl *m_fontPicker = nullptr;
@@ -73,7 +75,7 @@ private:
     wxColourPickerCtrl *m_cp_20v = nullptr;
     wxStaticText *m_lbl_c28v = nullptr;
     wxColourPickerCtrl *m_cp_28v = nullptr;
-    wxStaticText *m_lvl_c36v = nullptr;
+    wxStaticText *m_lbl_c36v = nullptr;
     wxColourPickerCtrl *m_cp_36v = nullptr;
     wxStaticText *m_lbl_c48v = nullptr;
     wxColourPickerCtrl *m_cp_48v = nullptr;
