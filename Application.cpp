@@ -23,34 +23,42 @@ wxIMPLEMENT_APP(MyApp); // NOLINT(*-pro-type-static-cast-downcast)
 bool MyApp::OnInit() {
     if (!wxApp::OnInit())
         return false;
-#ifdef DEBUG
-#ifdef _WIN32
-    if (AllocConsole()) {
-        freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-        freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
-        std::cout.clear();
-        std::cerr.clear();
-    }
-#endif
+
+#ifdef __WXMSW__
+    // Set application icon for taskbar
+    SetAppName(wxT("USB-C Power Monitor"));
+    SetAppDisplayName(wxT("USB-C Power Monitor"));
 #endif
 
     settings.init();
     settings.loadSettings();
-
+    
     auto frame = new MainFrame("MacWake USB-C OSD", wxDefaultPosition, wxSize(400, 250));
     frame->Show(true);
     return true;
 }
 
-MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size) : wxFrame( // NOLINT(*-pro-type-member-init)
+MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size) : wxFrame(
     nullptr, wxID_ANY, title, pos, size) {
 #ifdef __WXMAC__
     wxApp::s_macAboutMenuItemId = wxID_ABOUT;
 #endif
+
 #ifdef __WXMSW__
-    //SetIcon(wxIcon(wxT("CardsIcon")));
-#else
-    //SetIcon(wxIcon(forty_xpm));
+    // Create an icon bundle with multiple sizes
+    wxIconBundle iconBundle;
+
+    wxIcon icon(wxT("usbpower"), wxBITMAP_TYPE_ICO_RESOURCE);
+    if (icon.IsOk()) {
+        iconBundle.AddIcon(icon);
+        wxTopLevelWindowMSW::SetIcons(iconBundle);
+    } else {
+        std::cerr << "Failed to load icon" << std::endl;
+    }
+#elif defined(__WXGTK__)
+    if (wxFileExists(wxT("usb-power-osd.png"))) {
+        SetIcon(wxIcon(wxT("usb-power-osd.png"), wxBITMAP_TYPE_PNG));
+    }
 #endif
 
     this->m_graph_style = settings.is_line_graph ? GraphPanel::STYLE_LINE : GraphPanel::STYLE_BAR;
