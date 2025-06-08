@@ -23,6 +23,17 @@ wxIMPLEMENT_APP(MyApp); // NOLINT(*-pro-type-static-cast-downcast)
 bool MyApp::OnInit() {
     if (!wxApp::OnInit())
         return false;
+#ifdef DEBUG
+#ifdef _WIN32
+    if (AllocConsole()) {
+        freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+        freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
+        std::cout.clear();
+        std::cerr.clear();
+    }
+#endif
+#endif
+
     settings.init();
     settings.loadSettings();
 

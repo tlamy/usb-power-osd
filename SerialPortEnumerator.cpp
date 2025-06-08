@@ -8,6 +8,8 @@
 #include <wx/msw/registry.h>
 #endif
 
+#include <iostream>
+#include <bits/ostream.tcc>
 #include <wx/arrstr.h>
 #include <wx/dir.h>
 
@@ -36,6 +38,7 @@ std::vector<wxString> SerialPortEnumerator::GetPortNames() {
         {
             wxString strValueData;
             regKey.QueryValue(strValueName, strValueData);
+            std::cout << "Found port: " << strValueData.ToStdString() << std::endl;
             vStrPortNames.push_back(strValueData);
         }
 
@@ -53,5 +56,6 @@ std::vector<wxString> SerialPortEnumerator::GetPortNames() {
     }
 #endif // __WXMSW__
 
+    std::cerr << "Found " << vStrPortNames.size() << " ports" << std::endl;
     return vStrPortNames;
 }
