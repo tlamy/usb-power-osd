@@ -144,11 +144,15 @@ wxThread::ExitCode SerialThread::Entry() {
     updateStatus("Thread started");
 
     while (true) {
+        std::cout << "=== Starting port enumeration ===" << std::endl;  // Add this
         auto enumerator = new SerialPortEnumerator();
         if (TestDestroy())
             break;
 
-        for (const auto &port: enumerator->GetPortNames()) {
+        auto ports = enumerator->GetPortNames();  // Store result
+
+        for (const auto &port: ports) {
+            std::cout << "Processing port: " << port.ToStdString() << std::endl;  // Add this
             updateStatus(wxString::Format("Trying %s",
                                           std::filesystem::path(std::string(port.c_str())).filename().string()
             ));
