@@ -36,7 +36,7 @@ void SettingsDialog::CreateControls() {
     font.SetPointSize(m_settings.volts_font_size);
     font.SetFaceName(this->m_settings.volts_amps_font);
 
-    m_fontpicker = new wxFontPickerCtrl(this, wxID_ANY, font, wxDefaultPosition, wxDefaultSize, wxFNTP_DEFAULT_STYLE);
+    m_fontpicker = new wxFontPickerCtrl(this, wxID_ANY, font, wxDefaultPosition, wxDefaultSize, wxFNTP_FONTDESC_AS_LABEL);
     m_fontpicker->SetMaxPointSize(100);
     m_fontpicker->Bind(wxEVT_FONTPICKER_CHANGED, &SettingsDialog::OnFontChanged, this);
     line01->Add(m_fontpicker, 0, wxALL, 5);
@@ -273,6 +273,15 @@ void SettingsDialog::OnFontChanged(wxFontPickerEvent &event) {
     m_sample->Refresh();
     this->m_settings.volts_amps_font = selectedFont.GetFaceName().ToStdString();
     this->m_settings.volts_font_size = selectedFont.GetPointSize();
+    
+    // Refresh the sample to show the new font
+    m_sample->Refresh();
+    
+    // Recalculate the dialog size to accommodate the new font size
+    GetSizer()->Layout();           // First, layout the existing sizer
+    Fit();                          // Then resize to fit the content
+    
+    // Notify the main window
     dynamic_cast<MainFrame *>(this->m_mainWindow)->OnFontChanged(selectedFont);
 }
 
