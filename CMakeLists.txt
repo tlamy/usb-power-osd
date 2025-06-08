@@ -95,6 +95,11 @@ set(SRCS
         SettingsDialog.h
 )
 
+# Add Windows resource file
+if(WIN32)
+    set(SRCS ${SRCS} resources.rc)
+endif()
+
 if(APPLE)
     # Create the app bundle
     add_executable(usbc-power-osd MACOSX_BUNDLE ${SRCS})
