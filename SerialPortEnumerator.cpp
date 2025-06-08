@@ -9,7 +9,6 @@
 #endif
 
 #include <iostream>
-#include <bits/ostream.tcc>
 #include <wx/arrstr.h>
 #include <wx/dir.h>
 
