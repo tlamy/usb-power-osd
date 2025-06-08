@@ -1,3 +1,15 @@
+## [1.0.5](https://github.com/tlamy/usb-power-osd/compare/v1.0.4...v1.0.5) (2025-06-08)
+
+
+### Bug Fixes
+
+* clean up SettingsDialog ([a947a07](https://github.com/tlamy/usb-power-osd/commit/a947a072c2c751ffdadad6d585af80f5019d49d0))
+* fixed macos compile error ([6467550](https://github.com/tlamy/usb-power-osd/commit/6467550d8e3678e3f75513fcf6b3d9111079aba1))
+* fixed Windows icon (application and window/taskbar) ([be91981](https://github.com/tlamy/usb-power-osd/commit/be91981917316e329b7f084ee0e195c35c2e9f7e))
+* refresh layout for SettingsDialog after changing font to avoid overlapping objects ([fbfc20d](https://github.com/tlamy/usb-power-osd/commit/fbfc20d8114b544f003ecaea3a191bead9b238f1))
+* updated/added app icon for all supported OSes ([b0bf6fc](https://github.com/tlamy/usb-power-osd/commit/b0bf6fc3eb9475d4591855df7bfe55710785f36c))
+* **Windows:** Added debugging info ([4efb99b](https://github.com/tlamy/usb-power-osd/commit/4efb99b979ebe9100fa67355d1bc3377110e4948))
+
 ## [1.0.4](https://github.com/tlamy/usb-power-osd/compare/v1.0.3...v1.0.4) (2025-06-05)
 
 
