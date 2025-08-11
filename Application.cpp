@@ -8,8 +8,9 @@
 #include "OsdSettings.h"
 #include "GraphPanel.h"
 #include "MeasurementEvent.h"
-#include "SerialThread.h"
+#include "CommThread.h"
 #include "SettingsDialog.h"
+#include "DeviceSelectionDialog.h"
 
 class MyApp final : public wxApp {
 public:
@@ -35,6 +36,31 @@ bool MyApp::OnInit() {
     
     auto frame = new MainFrame("MacWake USB-C OSD", wxDefaultPosition, wxSize(400, 250));
     frame->Show(true);
+
+    // Show device selection dialog after main window is visible
+    CallAfter([frame]() {
+        DeviceSelectionDialog dialog(frame);
+        if (dialog.ShowModal() == wxID_OK && dialog.IsDeviceSelected()) {
+            SelectedDevice device = dialog.GetSelectedDevice();
+
+            // Handle the selected device
+            if (device.type == DeviceType::Serial) {
+                wxString message = wxString::Format("Selected serial port: %s", device.deviceInfo);
+                wxMessageBox(message, "Device Selected", wxOK | wxICON_INFORMATION);
+                // Initialize your serial communication here
+            } else if (device.type == DeviceType::BLE) {
+                wxString message = wxString::Format("Selected BLE device: %s (%s)",
+                                                    device.displayName, device.deviceInfo);
+                wxMessageBox(message, "Device Selected", wxOK | wxICON_INFORMATION);
+                // Initialize your BLE communication here
+            }
+        } else {
+            // User cancelled - you might want to show a message or close the app
+            wxMessageBox("No device selected. The application will continue without a connection.",
+                         "No Device", wxOK | wxICON_INFORMATION);
+        }
+    });
+
     return true;
 }
 
@@ -157,7 +183,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
     // Tell the sizer to adjust the layout
     mainSizer->Fit(panel);
 
-    this->serial_thread = new SerialThread(this);
+    this->serial_thread = new CommThread(this);
     if (this->serial_thread->Run() != wxTHREAD_NO_ERROR) {
         wxLogError("Failed to start serial communication thread.");
         delete this->serial_thread;

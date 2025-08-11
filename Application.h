@@ -5,7 +5,7 @@
 
 #include "GraphPanel.h"
 #include "MeasurementEvent.h"
-#include "SerialThread.h"
+#include "CommThread.h"
 #include "SettingsDialog.h"
 
 #define APP_NAME "USB Meter OSD"
@@ -56,7 +56,7 @@ private:
         SETTINGS,
     };
 
-    SerialThread *serial_thread;
+    CommThread *serial_thread;
     wxMenuBar *m_menuBar;
     bool m_show_status = true;
 };

@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
-
 project(usb_meter_osd LANGUAGES CXX)
 
 include(ProcessorCount)
@@ -26,6 +25,21 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Add SimpleBLE with proper configuration
+include(FetchContent)
+FetchContent_Declare(
+        simpleble
+        GIT_REPOSITORY https://github.com/OpenBluetoothToolbox/SimpleBLE.git
+        GIT_TAG v0.10.3
+)
+
+# Configure SimpleBLE options
+set(SIMPLEBLE_PLAIN OFF CACHE BOOL "" FORCE)
+set(SIMPLEBLE_LOG_LEVEL "FATAL" CACHE STRING "" FORCE)
+
+# Make SimpleBLE available
+FetchContent_MakeAvailable(simpleble)
+
 # Basic build options
 set(wxBUILD_SHARED OFF)
 set(wxBUILD_USE_STATIC_RUNTIME ON)
@@ -44,6 +58,7 @@ set(wxUSE_TREELISTCTRL ON)
 # Disabled features
 set(wxUSE_LIBWEBP OFF)
 set(wxUSE_WEBVIEW OFF)
+set(wxUSE_LIBJPEG OFF)
 set(wxUSE_REGEX OFF)
 set(wxUSE_EXPAT OFF)
 set(wxUSE_LIBTIFF OFF)
@@ -81,8 +96,8 @@ set(SRCS
         PowerDelivery.h
         OsdSettings.cpp
         OsdSettings.h
-        SerialThread.cpp
-        SerialThread.h
+        CommThread.cpp
+        CommThread.h
         serialib.cpp
         serialib.h
         SerialPortEnumerator.cpp
@@ -93,6 +108,11 @@ set(SRCS
         MeasurementEvent.h
         SettingsDialog.cpp
         SettingsDialog.h
+        BLEDeviceEnumerator.cpp
+        BLEDeviceEnumerator.h
+        DeviceSelectionDialog.cpp
+        DeviceSelectionDialog.h
+        BLEDriver.h
 )
 
 # Add Windows resource file
@@ -139,6 +159,12 @@ else()
     # so it works on all platforms
     add_executable(usbc-power-osd WIN32 ${SRCS} usbc-power-osd.exe.manifest)
 endif()
+
+# Define USE_SIMPLEBLE and link SimpleBLE
+target_compile_definitions(usbc-power-osd PRIVATE USE_SIMPLEBLE)
+
+# Link SimpleBLE using the correct target
+target_link_libraries(usbc-power-osd PRIVATE simpleble)
 
 # Platform-specific linking
 if(UNIX AND NOT APPLE)

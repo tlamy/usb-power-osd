@@ -22,7 +22,7 @@ This is a licence-free software, it can be used by anyone who try to build a bet
 
 #include <iostream>
 
-#include "SerialThread.h"
+#include "CommThread.h"
 #include "wx/utils.h"
 
 #if defined (_WIN32) || defined( _WIN64)
@@ -39,8 +39,8 @@ This is a licence-free software, it can be used by anyone who try to build a bet
 serialib::serialib() {
 #if defined (_WIN32) || defined( _WIN64)
     // Set default value for RTS and DTR (Windows only)
-    currentStateRTS=true;
-    currentStateDTR=true;
+    currentStateRTS = true;
+    currentStateDTR = true;
     hSerial = INVALID_HANDLE_VALUE;
     timeouts = new COMMTIMEOUTS;
 #endif
@@ -156,9 +156,9 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
                           SerialStopBits Stopbits) {
 #if defined (_WIN32) || defined( _WIN64)
     // Open serial port
-    hSerial = CreateFileA(Device,GENERIC_READ | GENERIC_WRITE,0,0,OPEN_EXISTING,/*FILE_ATTRIBUTE_NORMAL*/0,0);
-    if(hSerial==INVALID_HANDLE_VALUE) {
-        if(GetLastError()==ERROR_FILE_NOT_FOUND)
+    hSerial = CreateFileA(Device, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,/*FILE_ATTRIBUTE_NORMAL*/0, 0);
+    if (hSerial == INVALID_HANDLE_VALUE) {
+        if (GetLastError() == ERROR_FILE_NOT_FOUND)
             return -1; // Device not found
 
         // Error while opening the device
@@ -169,55 +169,82 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
 
     // Structure for the port parameters
     DCB dcbSerialParams;
-    dcbSerialParams.DCBlength=sizeof(dcbSerialParams);
+    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
 
     // Get the port parameters
     if (!GetCommState(hSerial, &dcbSerialParams)) return -3;
 
     // Set the speed (Bauds)
-    switch (Bauds)
-    {
-    case 110  :     dcbSerialParams.BaudRate=CBR_110; break;
-    case 300  :     dcbSerialParams.BaudRate=CBR_300; break;
-    case 600  :     dcbSerialParams.BaudRate=CBR_600; break;
-    case 1200 :     dcbSerialParams.BaudRate=CBR_1200; break;
-    case 2400 :     dcbSerialParams.BaudRate=CBR_2400; break;
-    case 4800 :     dcbSerialParams.BaudRate=CBR_4800; break;
-    case 9600 :     dcbSerialParams.BaudRate=CBR_9600; break;
-    case 14400 :    dcbSerialParams.BaudRate=CBR_14400; break;
-    case 19200 :    dcbSerialParams.BaudRate=CBR_19200; break;
-    case 38400 :    dcbSerialParams.BaudRate=CBR_38400; break;
-    case 56000 :    dcbSerialParams.BaudRate=CBR_56000; break;
-    case 57600 :    dcbSerialParams.BaudRate=CBR_57600; break;
-    case 115200 :   dcbSerialParams.BaudRate=CBR_115200; break;
-    case 128000 :   dcbSerialParams.BaudRate=CBR_128000; break;
-    case 256000 :   dcbSerialParams.BaudRate=CBR_256000; break;
-    default : return -4;
+    switch (Bauds) {
+        case 110: dcbSerialParams.BaudRate = CBR_110;
+            break;
+        case 300: dcbSerialParams.BaudRate = CBR_300;
+            break;
+        case 600: dcbSerialParams.BaudRate = CBR_600;
+            break;
+        case 1200: dcbSerialParams.BaudRate = CBR_1200;
+            break;
+        case 2400: dcbSerialParams.BaudRate = CBR_2400;
+            break;
+        case 4800: dcbSerialParams.BaudRate = CBR_4800;
+            break;
+        case 9600: dcbSerialParams.BaudRate = CBR_9600;
+            break;
+        case 14400: dcbSerialParams.BaudRate = CBR_14400;
+            break;
+        case 19200: dcbSerialParams.BaudRate = CBR_19200;
+            break;
+        case 38400: dcbSerialParams.BaudRate = CBR_38400;
+            break;
+        case 56000: dcbSerialParams.BaudRate = CBR_56000;
+            break;
+        case 57600: dcbSerialParams.BaudRate = CBR_57600;
+            break;
+        case 115200: dcbSerialParams.BaudRate = CBR_115200;
+            break;
+        case 128000: dcbSerialParams.BaudRate = CBR_128000;
+            break;
+        case 256000: dcbSerialParams.BaudRate = CBR_256000;
+            break;
+        default: return -4;
     }
     //select data size
     BYTE bytesize = 0;
-    switch(Databits) {
-        case SERIAL_DATABITS_5: bytesize = 5; break;
-        case SERIAL_DATABITS_6: bytesize = 6; break;
-        case SERIAL_DATABITS_7: bytesize = 7; break;
-        case SERIAL_DATABITS_8: bytesize = 8; break;
-        case SERIAL_DATABITS_16: bytesize = 16; break;
+    switch (Databits) {
+        case SERIAL_DATABITS_5: bytesize = 5;
+            break;
+        case SERIAL_DATABITS_6: bytesize = 6;
+            break;
+        case SERIAL_DATABITS_7: bytesize = 7;
+            break;
+        case SERIAL_DATABITS_8: bytesize = 8;
+            break;
+        case SERIAL_DATABITS_16: bytesize = 16;
+            break;
         default: return -7;
     }
     BYTE stopBits = 0;
-    switch(Stopbits) {
-        case SERIAL_STOPBITS_1: stopBits = ONESTOPBIT; break;
-        case SERIAL_STOPBITS_1_5: stopBits = ONE5STOPBITS; break;
-        case SERIAL_STOPBITS_2: stopBits = TWOSTOPBITS; break;
+    switch (Stopbits) {
+        case SERIAL_STOPBITS_1: stopBits = ONESTOPBIT;
+            break;
+        case SERIAL_STOPBITS_1_5: stopBits = ONE5STOPBITS;
+            break;
+        case SERIAL_STOPBITS_2: stopBits = TWOSTOPBITS;
+            break;
         default: return -8;
     }
     BYTE parity = 0;
-    switch(Parity) {
-        case SERIAL_PARITY_NONE: parity = NOPARITY; break;
-        case SERIAL_PARITY_EVEN: parity = EVENPARITY; break;
-        case SERIAL_PARITY_ODD: parity = ODDPARITY; break;
-        case SERIAL_PARITY_MARK: parity = MARKPARITY; break;
-        case SERIAL_PARITY_SPACE: parity = SPACEPARITY; break;
+    switch (Parity) {
+        case SERIAL_PARITY_NONE: parity = NOPARITY;
+            break;
+        case SERIAL_PARITY_EVEN: parity = EVENPARITY;
+            break;
+        case SERIAL_PARITY_ODD: parity = ODDPARITY;
+            break;
+        case SERIAL_PARITY_MARK: parity = MARKPARITY;
+            break;
+        case SERIAL_PARITY_SPACE: parity = SPACEPARITY;
+            break;
         default: return -9;
     }
     // configure byte size
@@ -231,7 +258,7 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
     dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
 
     // Write the parameters
-    if(!SetCommState(hSerial, &dcbSerialParams)) return -5;
+    if (!SetCommState(hSerial, &dcbSerialParams)) return -5;
 
     // Set TimeOut
 
@@ -247,7 +274,7 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
     if (!SetCommTimeouts(hSerial, timeouts)) return -6;
 
     // Opening successful
-    std::cerr << "Open successful" <<std::endl;
+    std::cerr << "Open successful" << std::endl;
     return 1;
 #endif
 #if defined (__linux__) || defined(__APPLE__)
@@ -294,46 +321,46 @@ char serialib::openDevice(const char *Device, const unsigned int Bauds,
         case 115200: Speed = B115200;
             break;
 #if defined (B230400)
-        case 230400: Speed = B230400;
-            break;
+case 230400: Speed = B230400;
+    break;
 #endif
 #if defined (B460800)
-    case 460800 :   Speed=B460800; break;
+case 460800: Speed = B460800; break;
 #endif
 #if defined (B500000)
-    case 500000 :   Speed=B500000; break;
+case 500000: Speed = B500000; break;
 #endif
 #if defined (B576000)
-    case 576000 :   Speed=B576000; break;
+case 576000: Speed = B576000; break;
 #endif
 #if defined (B921600)
-    case 921600 :   Speed=B921600; break;
+case 921600: Speed = B921600; break;
 #endif
 #if defined (B1000000)
-    case 1000000 :   Speed=B1000000; break;
+case 1000000: Speed = B1000000; break;
 #endif
 #if defined (B1152000)
-    case 1152000 :   Speed=B1152000; break;
+case 1152000: Speed = B1152000; break;
 #endif
 #if defined (B1500000)
-    case 1500000 :   Speed=B1500000; break;
+case 1500000: Speed = B1500000; break;
 #endif
 #if defined (B2000000)
-    case 2000000 :   Speed=B2000000; break;
+case 2000000: Speed = B2000000; break;
 #endif
 #if defined (B2500000)
-    case 2500000 :   Speed=B2500000; break;
+case 2500000: Speed = B2500000; break;
 #endif
 #if defined (B3000000)
-    case 3000000 :   Speed=B3000000; break;
+case 3000000: Speed = B3000000; break;
 #endif
 #if defined (B3500000)
-    case 3500000 :   Speed=B3500000; break;
+case 3500000: Speed = B3500000; break;
 #endif
 #if defined (B4000000)
-    case 4000000 :   Speed=B4000000; break;
+case 4000000: Speed = B4000000; break;
 #endif
-        default: return -4;
+default: return -4;
     }
     int databits_flag = 0;
     switch (Databits) {
@@ -427,7 +454,7 @@ int serialib::writeChar(const char Byte) const {
     DWORD dwBytesWritten;
     // Write the char to the serial device
     // Return -1 if an error occured
-    if(!WriteFile(hSerial,&Byte,1,&dwBytesWritten,NULL)) return -1;
+    if (!WriteFile(hSerial, &Byte, 1, &dwBytesWritten, NULL)) return -1;
     // Write operation successfull
     return 1;
 #endif
@@ -456,7 +483,7 @@ int serialib::writeString(const char *receivedString) const {
     // Number of bytes written
     DWORD dwBytesWritten;
     // Write the string
-    if(!WriteFile(hSerial,receivedString,strlen(receivedString),&dwBytesWritten,NULL))
+    if (!WriteFile(hSerial, receivedString, strlen(receivedString), &dwBytesWritten, NULL))
         // Error while writing, return -1
         return -1;
     // Write operation successfull
@@ -488,7 +515,7 @@ int serialib::writeBytes(const void *Buffer, const unsigned int NbBytes) const {
     // Number of bytes written
     DWORD dwBytesWritten;
     // Write data
-    if(!WriteFile(hSerial, Buffer, NbBytes, &dwBytesWritten, NULL))
+    if (!WriteFile(hSerial, Buffer, NbBytes, &dwBytesWritten, NULL))
         // Error while writing, return -1
         return -1;
     // Write operation successfull
@@ -525,10 +552,10 @@ int serialib::readChar(char *pByte, unsigned int timeOut_ms) const {
     if (!SetCommTimeouts(hSerial, timeouts)) return -1;
 
     // Read the byte, return -2 if an error occured
-    if(!ReadFile(hSerial,pByte, 1, &dwBytesRead, NULL)) return -2;
+    if (!ReadFile(hSerial, pByte, 1, &dwBytesRead, NULL)) return -2;
 
     // Return 0 if the timeout is reached
-    if (dwBytesRead==0) return 0;
+    if (dwBytesRead == 0) return 0;
 
     // The byte is read
     return 1;
@@ -627,7 +654,7 @@ int serialib::readString(char *receivedString, char finalChar, unsigned int maxN
     while (nbBytes < maxNbBytes) {
         // Compute timeout first
         timeOutParam = timeOut_ms - timer.elapsedTime_ms();
-        
+
         if (timeOutParam <= 0) {
             // Timeout reached
             receivedString[nbBytes] = 0;
@@ -659,7 +686,7 @@ int serialib::readString(char *receivedString, char finalChar, unsigned int maxN
         }
     }
 
-    return -3;  // Buffer full
+    return -3; // Buffer full
 }
 
 
@@ -693,7 +720,7 @@ int serialib::readBytes(void *buffer, unsigned int maxNbBytes, unsigned int time
 
 
     // Read the bytes from the serial device, return -2 if an error occured
-    if(!ReadFile(hSerial,buffer,(DWORD)maxNbBytes,&dwBytesRead, NULL))  return -2;
+    if (!ReadFile(hSerial, buffer, (DWORD) maxNbBytes, &dwBytesRead, NULL)) return -2;
 
     // Return the byte read
     return dwBytesRead;
@@ -743,11 +770,11 @@ int serialib::readBytes(void *buffer, unsigned int maxNbBytes, unsigned int time
 char serialib::flushReceiver() const {
 #if defined (_WIN32) || defined(_WIN64)
     // Purge receiver
-    return PurgeComm (hSerial, PURGE_RXCLEAR);
+    return PurgeComm(hSerial, PURGE_RXCLEAR);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Purge receiver
-    tcflush(fd,TCIFLUSH);
+    tcflush(fd, TCIFLUSH);
     return true;
 #endif
 }
@@ -808,8 +835,8 @@ bool serialib::DTR(bool status) {
 bool serialib::setDTR() {
 #if defined (_WIN32) || defined(_WIN64)
     // Set DTR
-    currentStateDTR=true;
-    return EscapeCommFunction(hSerial,SETDTR);
+    currentStateDTR = true;
+    return EscapeCommFunction(hSerial, SETDTR);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Set DTR
@@ -830,8 +857,8 @@ bool serialib::setDTR() {
 bool serialib::clearDTR() {
 #if defined (_WIN32) || defined(_WIN64)
     // Clear DTR
-    currentStateDTR=false;
-    return EscapeCommFunction(hSerial,CLRDTR);
+    currentStateDTR = false;
+    return EscapeCommFunction(hSerial, CLRDTR);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Clear DTR
@@ -872,8 +899,8 @@ bool serialib::RTS(bool status) {
 bool serialib::setRTS() {
 #if defined (_WIN32) || defined(_WIN64)
     // Set RTS
-    currentStateRTS=true;
-    return EscapeCommFunction(hSerial,SETRTS);
+    currentStateRTS = true;
+    return EscapeCommFunction(hSerial, SETRTS);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Set RTS
@@ -895,8 +922,8 @@ bool serialib::setRTS() {
 bool serialib::clearRTS() {
 #if defined (_WIN32) || defined(_WIN64)
     // Clear RTS
-    currentStateRTS=false;
-    return EscapeCommFunction(hSerial,CLRRTS);
+    currentStateRTS = false;
+    return EscapeCommFunction(hSerial, CLRRTS);
 #endif
 #if defined (__linux__) || defined(__APPLE__)
     // Clear RTS
@@ -1076,10 +1103,10 @@ unsigned long int timeOut::elapsedTime_ms() const {
     QueryPerformanceCounter(&CurrentTime);
 
     // Compute the number of ticks elapsed since last call
-    sec=CurrentTime.QuadPart-previousTime;
+    sec = CurrentTime.QuadPart - previousTime;
 
     // Return the elapsed time in milliseconds
-    return sec/(counterFrequency/1000);
+    return sec / (counterFrequency / 1000);
 #else
     // Current time
     struct timeval CurrentTime;

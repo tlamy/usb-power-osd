@@ -5,9 +5,9 @@
 #include <wx/thread.h>
 
 
-class SerialThread final : public wxThread {
+class CommThread final : public wxThread {
 public:
-    explicit SerialThread(wxEvtHandler *frame) : wxThread(wxTHREAD_DETACHED), m_frame(frame) {
+    explicit CommThread(wxEvtHandler *frame) : wxThread(wxTHREAD_DETACHED), m_frame(frame) {
     }
 
 protected:

@@ -1,7 +1,7 @@
 #include <wx/app.h>
 #include <wx/event.h>
 #include "serialib.h"
-#include "SerialThread.h"
+#include "CommThread.h"
 
 #include <filesystem>
 
@@ -35,7 +35,7 @@ static int16_t hex4_to_uint16(const char *buf) {
 }
 
 
-void SerialThread::updateStatus(const wxString &status) {
+void CommThread::updateStatus(const wxString &status) {
     auto *event = new wxThreadEvent(wxEVT_STATUS_UPDATE);
     event->SetString(status);
     if (!this->m_frame) {
@@ -47,7 +47,7 @@ void SerialThread::updateStatus(const wxString &status) {
     }
 }
 
-bool SerialThread::measure_loop(const std::string &device) {
+bool CommThread::measure_loop(const std::string &device) {
     auto port = new serialib();
     char code;
     if ((code = port->openDevice(device.c_str(), 9600)) != 1) {
@@ -140,25 +140,23 @@ bool SerialThread::measure_loop(const std::string &device) {
     return true;
 }
 
-wxThread::ExitCode SerialThread::Entry() {
+wxThread::ExitCode CommThread::Entry() {
     updateStatus("Thread started");
 
     while (true) {
-        std::cout << "=== Starting port enumeration ===" << std::endl;  // Add this
-        auto enumerator = new SerialPortEnumerator();
+        std::cout << "=== Starting port enumeration ===" << std::endl;
         if (TestDestroy())
             break;
 
-        auto ports = enumerator->GetPortNames();  // Store result
+        auto ports = SerialPortEnumerator::GetPortNames(); // Changed to static call
 
         for (const auto &port: ports) {
-            std::cout << "Processing port: " << port.ToStdString() << std::endl;  // Add this
+            std::cout << "Processing port: " << port.ToStdString() << std::endl;
             updateStatus(wxString::Format("Trying %s",
                                           std::filesystem::path(std::string(port.c_str())).filename().string()
             ));
             this->measure_loop(std::string(port.c_str()));
         }
-        delete enumerator;
         updateStatus("Waiting for device");
         Sleep(1000);
     }
