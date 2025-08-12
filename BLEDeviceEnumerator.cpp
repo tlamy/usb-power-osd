@@ -1,8 +1,6 @@
 #include "BLEDeviceEnumerator.h"
 
-#ifdef USE_SIMPLEBLE
 #include <simpleble/SimpleBLE.h>
-#endif
 
 #include <thread>
 #include <chrono>
@@ -12,7 +10,6 @@
 class BLEDeviceEnumerator::Impl {
 public:
     Impl() : scanning(false) {
-#ifdef USE_SIMPLEBLE
         try {
             auto adapters = SimpleBLE::Adapter::get_adapters();
             if (!adapters.empty()) {
@@ -24,9 +21,6 @@ public:
         } catch (const std::exception &e) {
             std::cerr << "Error initializing BLE adapter: " << e.what() << std::endl;
         }
-#else
-        std::cout << "SimpleBLE not available (USE_SIMPLEBLE not defined)" << std::endl;
-#endif
     }
 
     ~Impl() {
@@ -34,7 +28,6 @@ public:
     }
 
     bool StartScan(int timeoutMs) {
-#ifdef USE_SIMPLEBLE
         if (!adapter) {
             std::cerr << "No BLE adapter available" << std::endl;
             return false;
@@ -57,12 +50,13 @@ public:
 
                 deviceInfo.rssi = peripheral.rssi();
                 deviceInfo.connectable = peripheral.is_connectable();
-
-                // Get advertised services (note: this might not work during scanning for all devices)
+                
+                // Get advertised services
                 try {
                     auto services = peripheral.services();
-                    for (const auto &service: services) {
+                    for (auto& service: services) {
                         deviceInfo.serviceUuids.push_back(wxString(service.uuid()));
+                        std::cout << "  Service: " << service.uuid() << std::endl;
                     }
                 } catch (const std::exception &e) {
                     // Services might not be available during scanning
@@ -100,20 +94,15 @@ public:
             scanThread.detach();
 
             return true;
-        } catch (const std::exception &e) {
+        }
+        catch (const std::exception &e) {
             std::cerr << "Failed to start BLE scan: " << e.what() << std::endl;
             scanning = false;
             return false;
         }
-#else
-        std::cerr << "BLE not available: SimpleBLE not compiled in" << std::endl;
-        scanning = false;
-        return false;
-#endif
     }
 
     void StopScan() {
-#ifdef USE_SIMPLEBLE
         if (adapter && scanning) {
             try {
                 adapter->scan_stop();
@@ -122,7 +111,6 @@ public:
                 std::cerr << "Error stopping BLE scan: " << e.what() << std::endl;
             }
         }
-#endif
         scanning = false;
     }
 
@@ -139,17 +127,11 @@ public:
     }
 
     bool IsBluetoothAvailable() const {
-#ifdef USE_SIMPLEBLE
         return adapter != nullptr;
-#else
-        return false;
-#endif
     }
 
 private:
-#ifdef USE_SIMPLEBLE
     std::unique_ptr<SimpleBLE::Adapter> adapter;
-#endif
     std::vector<BLEDeviceInfo> discoveredDevices;
     std::atomic<bool> scanning; // Make it atomic for thread safety
 };
@@ -194,20 +176,20 @@ void BLEDeviceEnumerator::ClearDiscoveredDevices() {
 std::vector<BLEDeviceInfo> BLEDeviceEnumerator::FilterDevicesByName(const wxString &namePattern) const {
     auto devices = GetDiscoveredDevices();
     std::vector<BLEDeviceInfo> filtered;
-
+    
     for (const auto &device: devices) {
         if (device.name.Contains(namePattern)) {
             filtered.push_back(device);
         }
     }
-
+    
     return filtered;
 }
 
 std::vector<BLEDeviceInfo> BLEDeviceEnumerator::FilterDevicesByService(const wxString &serviceUuid) const {
     auto devices = GetDiscoveredDevices();
     std::vector<BLEDeviceInfo> filtered;
-
+    
     for (const auto &device: devices) {
         for (const auto &uuid: device.serviceUuids) {
             if (uuid.Upper() == serviceUuid.Upper()) {
@@ -216,7 +198,7 @@ std::vector<BLEDeviceInfo> BLEDeviceEnumerator::FilterDevicesByService(const wxS
             }
         }
     }
-
+    
     return filtered;
 }
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
-project(usb_meter_osd LANGUAGES CXX)
+project(usb_meter_osd LANGUAGES CXX C OBJCXX)
 
 include(ProcessorCount)
 ProcessorCount(N)
@@ -25,20 +25,22 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add SimpleBLE with proper configuration
-include(FetchContent)
-FetchContent_Declare(
-        simpleble
-        GIT_REPOSITORY https://github.com/OpenBluetoothToolbox/SimpleBLE.git
-        GIT_TAG v0.10.3
-)
+# Add SimpleBLE from submodule
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/SimpleBLE/simpleble/CMakeLists.txt")
+    message(STATUS "Found SimpleBLE submodule, enabling BLE support")
 
-# Configure SimpleBLE options
-set(SIMPLEBLE_PLAIN OFF CACHE BOOL "" FORCE)
-set(SIMPLEBLE_LOG_LEVEL "FATAL" CACHE STRING "" FORCE)
+    # Configure SimpleBLE options
+    set(SIMPLEBLE_PLAIN OFF CACHE BOOL "" FORCE)
+    set(SIMPLEBLE_LOG_LEVEL "FATAL" CACHE STRING "" FORCE)
 
-# Make SimpleBLE available
-FetchContent_MakeAvailable(simpleble)
+    # Add SimpleBLE subdirectory
+    add_subdirectory(third-party/SimpleBLE/simpleble)
+
+    set(BLE_ENABLED TRUE)
+else ()
+    message(WARNING "SimpleBLE submodule not found. BLE support will be disabled.")
+    set(BLE_ENABLED FALSE)
+endif ()
 
 # Basic build options
 set(wxBUILD_SHARED OFF)
@@ -160,11 +162,9 @@ else()
     add_executable(usbc-power-osd WIN32 ${SRCS} usbc-power-osd.exe.manifest)
 endif()
 
-# Define USE_SIMPLEBLE and link SimpleBLE
 target_compile_definitions(usbc-power-osd PRIVATE USE_SIMPLEBLE)
-
-# Link SimpleBLE using the correct target
-target_link_libraries(usbc-power-osd PRIVATE simpleble)
+target_link_libraries(usbc-power-osd PRIVATE simpleble::simpleble)
+message(STATUS "BLE support enabled")
 
 # Platform-specific linking
 if(UNIX AND NOT APPLE)
