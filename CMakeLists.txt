@@ -115,6 +115,7 @@ set(SRCS
         DeviceSelectionDialog.cpp
         DeviceSelectionDialog.h
         BLEDriver.h
+        SelectedDevice.h
 )
 
 # Add Windows resource file

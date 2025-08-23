@@ -4,22 +4,30 @@
 #include <wx/event.h>
 #include <wx/thread.h>
 
+#include "DeviceSelectionDialog.h"
+#include "SelectedDevice.h"
 
 class CommThread final : public wxThread {
 public:
-    explicit CommThread(wxEvtHandler *frame) : wxThread(wxTHREAD_DETACHED), m_frame(frame) {
-    }
+  explicit CommThread(wxEvtHandler *frame)
+      : wxThread(wxTHREAD_DETACHED), m_frame(frame) {}
+
+  void setDevice(SelectedDevice *device);
 
 protected:
-    ExitCode Entry() override;
+  ExitCode Entry() override;
 
 private:
-    void updateStatus(const wxString &status);
+  void updateStatus(const wxString &status);
 
-    bool measure_loop(const std::string &device);
+  bool ble_measure_loop(const SelectedDevice &device);
 
-    wxEvtHandler *m_frame;
+  bool serial_measure_loop(const std::string &device);
 
-    enum { SEARCH, MEASURE, WAIT } p_mode = SEARCH;
+  wxEvtHandler *m_frame;
+
+  enum { SEARCH, MEASURE, WAIT } p_mode = SEARCH;
+
+  SelectedDevice *device = nullptr;
 };
-#endif //SERIALTHREAD_H
+#endif // SERIALTHREAD_H

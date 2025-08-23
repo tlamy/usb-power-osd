@@ -9,15 +9,15 @@
 #include <wx/event.h>
 
 enum {
-    ALWAYSONTOP = wxID_HIGHEST + 1,
-    GRAPHTYPE,
-    wxID_CHANGESTATUS,
-    // Add more custom IDs here
-    ID_StartMonitoring,
-    ID_StopMonitoring,
-    // etc.
+  ALWAYSONTOP = wxID_HIGHEST + 1,
+  GRAPHTYPE,
+  wxID_CHANGESTATUS,
+  // Add more custom IDs here
+  ID_StartMonitoring,
+  ID_StopMonitoring,
+  // etc.
 };
 
 wxDECLARE_EVENT(wxEVT_STATUS_UPDATE, wxThreadEvent);
 
-#endif //EVENTS_H
+#endif // EVENTS_H

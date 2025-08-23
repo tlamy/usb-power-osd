@@ -3,7 +3,7 @@
 #include <vector>
 #include <wx/string.h>
 
-#ifdef __WXMSW__  // Only for Windows
+#ifdef __WXMSW__ // Only for Windows
 #include <wx/buffer.h>
 #include <wx/msw/registry.h>
 #endif
@@ -13,48 +13,49 @@
 #include <wx/dir.h>
 
 std::vector<wxString> SerialPortEnumerator::GetPortNames() {
-    std::vector<wxString> vStrPortNames;
+  std::vector<wxString> vStrPortNames;
 #ifdef __WXMSW__
-    wxRegKey regKey(wxRegKey::HKLM, wxS("HARDWARE\\DEVICEMAP\\SERIALCOMM"));
+  wxRegKey regKey(wxRegKey::HKLM, wxS("HARDWARE\\DEVICEMAP\\SERIALCOMM"));
 
-    if (!regKey.Exists())
-        return vStrPortNames;
+  if (!regKey.Exists())
+    return vStrPortNames;
 
-    wxASSERT(regKey.Exists());
+  wxASSERT(regKey.Exists());
 
-    wxString strValueName;
-    long lIndex;
+  wxString strValueName;
+  long lIndex;
 
-    // Enumerate all values
-    bool bCont = regKey.GetFirstValue(strValueName, lIndex);
+  // Enumerate all values
+  bool bCont = regKey.GetFirstValue(strValueName, lIndex);
 
-    while (bCont)
-    {
-        wxRegKey::ValueType valueType = regKey.GetValueType(strValueName);
+  while (bCont) {
+    wxRegKey::ValueType valueType = regKey.GetValueType(strValueName);
 
-        if ((valueType == wxRegKey::Type_String || valueType == wxRegKey::Type_Expand_String ||
-             valueType == wxRegKey::Type_Multi_String) && !strValueName.empty())
-        {
-            wxString strValueData;
-            regKey.QueryValue(strValueName, strValueData);
-            std::cout << "Found port: " << strValueData.ToStdString() << std::endl;
-            vStrPortNames.push_back(strValueData);
-        }
-
-        bCont = regKey.GetNextValue(strValueName, lIndex);
+    if ((valueType == wxRegKey::Type_String ||
+         valueType == wxRegKey::Type_Expand_String ||
+         valueType == wxRegKey::Type_Multi_String) &&
+        !strValueName.empty()) {
+      wxString strValueData;
+      regKey.QueryValue(strValueName, strValueData);
+      std::cout << "Found port: " << strValueData.ToStdString() << std::endl;
+      vStrPortNames.push_back(strValueData);
     }
+
+    bCont = regKey.GetNextValue(strValueName, lIndex);
+  }
 #else // !__WXMSW__
-    wxArrayString arrStrFiles;
+  wxArrayString arrStrFiles;
 #ifdef __WXMAC__
-    wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("tty.usbserial*"), wxDIR_FILES);
+  wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("cu.usb*"), wxDIR_FILES);
 #else
-    wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("ttyUSB*"), wxDIR_FILES);
+  wxDir::GetAllFiles(wxS("/dev/"), &arrStrFiles, wxS("ttyUSB*"), wxDIR_FILES);
 #endif
-    for (wxArrayString::const_iterator it = arrStrFiles.begin(); it != arrStrFiles.end(); ++it) {
-        vStrPortNames.push_back(*it);
-    }
+  for (wxArrayString::const_iterator it = arrStrFiles.begin();
+       it != arrStrFiles.end(); ++it) {
+    vStrPortNames.push_back(*it);
+  }
 #endif // __WXMSW__
 
-    std::cerr << "Found " << vStrPortNames.size() << " ports" << std::endl;
-    return vStrPortNames;
+  std::cerr << "Found " << vStrPortNames.size() << " ports" << std::endl;
+  return vStrPortNames;
 }

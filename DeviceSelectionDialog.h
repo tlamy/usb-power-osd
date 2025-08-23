@@ -1,104 +1,92 @@
 #ifndef DEVICESELECTIONDIALOG_H
 #define DEVICESELECTIONDIALOG_H
 
-#include <wx/wx.h>
-#include <wx/listctrl.h>
-#include <wx/gauge.h>
-#include <wx/timer.h>
-#include <vector>
-#include "SerialPortEnumerator.h"
 #include "BLEDeviceEnumerator.h"
+#include "CommThread.h"
+#include "SelectedDevice.h"
+#include "SerialPortEnumerator.h"
+#include "simpleble/Peripheral.h"
 #include "wx/notebook.h"
-
-enum class DeviceType {
-    Serial,
-    BLE
-};
-
-struct SelectedDevice {
-    DeviceType type;
-    wxString deviceInfo; // Port name for serial, address for BLE
-    wxString displayName; // Friendly name for display
-};
+#include <vector>
+#include <wx/gauge.h>
+#include <wx/listctrl.h>
+#include <wx/timer.h>
+#include <wx/wx.h>
 
 class DeviceSelectionDialog : public wxDialog {
 public:
-    DeviceSelectionDialog(wxWindow *parent);
+  explicit DeviceSelectionDialog(wxWindow *parent);
 
-    // Get the selected device info
-    bool IsDeviceSelected() const { return m_deviceSelected; }
-    SelectedDevice GetSelectedDevice() const { return m_selectedDevice; }
+  // Get the selected device info
+  bool IsDeviceSelected() const { return m_deviceSelected; }
+  SelectedDevice GetSelectedDevice() const { return m_selectedDevice; }
 
 private:
-    enum {
-        ID_REFRESH_BUTTON = 1000,
-        ID_DEVICE_LIST,
-        ID_SCAN_TIMER
-    };
+  enum { ID_REFRESH_BUTTON = 1000, ID_DEVICE_LIST, ID_SCAN_TIMER };
 
-    // UI Controls
-    wxNotebook *m_notebook;
-    wxPanel *m_serialPanel;
-    wxPanel *m_blePanel;
+  // UI Controls
+  wxNotebook *m_notebook;
+  wxPanel *m_serialPanel;
+  wxPanel *m_blePanel;
 
-    // Serial tab
-    wxListCtrl *m_serialList;
-    wxButton *m_refreshSerialButton;
+  // Serial tab
+  wxListCtrl *m_serialList;
+  wxButton *m_refreshSerialButton;
 
-    // BLE tab
-    wxListCtrl *m_bleList;
-    wxButton *m_scanBleButton;
-    wxGauge *m_scanProgress;
-    wxStaticText *m_scanStatus;
-    wxTimer m_scanTimer; // Changed from pointer
+  // BLE tab
+  wxListCtrl *m_bleList;
+  wxButton *m_scanBleButton;
+  wxGauge *m_scanProgress;
+  wxStaticText *m_scanStatus;
+  wxTimer m_scanTimer; // Changed from pointer
 
-    // Common controls
-    wxButton *m_okButton;
-    wxButton *m_cancelButton;
+  // Common controls
+  wxButton *m_okButton;
+  wxButton *m_cancelButton;
 
-    // Data
-    std::vector<wxString> m_serialPorts;
-    std::vector<BLEDeviceInfo> m_bleDevices;
-    BLEDeviceEnumerator m_bleEnumerator;
-    SelectedDevice m_selectedDevice;
-    bool m_deviceSelected;
-    int m_scanTimeRemaining;
+  // Data
+  std::vector<wxString> m_serialPorts;
+  std::vector<BLEDeviceInfo> m_bleDevices;
+  BLEDeviceEnumerator m_bleEnumerator;
+  SelectedDevice m_selectedDevice;
+  bool m_deviceSelected;
+  int m_scanTimeRemaining;
 
-    // Event handlers
-    void OnRefreshSerial(wxCommandEvent &event);
+  // Event handlers
+  void OnRefreshSerial(wxCommandEvent &event);
 
-    void OnScanBLE(wxCommandEvent &event);
+  void OnScanBLE(wxCommandEvent &event);
 
-    void OnScanTimer(wxTimerEvent &event);
+  void OnScanTimer(wxTimerEvent &event);
 
-    void OnSerialItemSelected(wxListEvent &event);
+  void OnSerialItemSelected(wxListEvent &event);
 
-    void OnBLEItemSelected(wxListEvent &event);
+  void OnBLEItemSelected(wxListEvent &event);
 
-    void OnSerialItemActivated(wxListEvent &event);
+  void OnSerialItemActivated(wxListEvent &event);
 
-    void OnBLEItemActivated(wxListEvent &event);
+  void OnBLEItemActivated(wxListEvent &event);
 
-    void OnOK(wxCommandEvent &event);
+  void OnOK(wxCommandEvent &event);
 
-    void OnCancel(wxCommandEvent &event);
+  bool ConnectBLEDevice();
 
-    void OnClose(wxCloseEvent &event);
+  void OnCancel(wxCommandEvent &event);
 
-    // Helper methods
-    void CreateControls();
+  void OnClose(wxCloseEvent &event);
 
-    void RefreshSerialDevices();
+  // Helper methods
+  void CreateControls();
 
-    void StartBLEScan();
+  void RefreshSerialDevices();
 
-    void UpdateBLEList();
+  void StartBLEScan();
 
-    void EnableControls(bool enable);
+  void UpdateBLEList();
 
-    bool ValidateSelection();
+  void EnableControls(bool enable);
 
-    wxDECLARE_EVENT_TABLE();
+  bool ValidateSelection();
 };
 
 #endif // DEVICESELECTIONDIALOG_H
