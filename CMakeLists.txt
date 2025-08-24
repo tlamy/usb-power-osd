@@ -92,30 +92,31 @@ set(EXECUTABLE_NAME "USB-C Power")
 
 set(SRCS
         Application.cpp
-        GraphPanel.cpp
-        GraphPanel.h
-        PowerDelivery.cpp
-        PowerDelivery.h
-        OsdSettings.cpp
-        OsdSettings.h
+        BLEDeviceEnumerator.cpp
+        BLEDeviceEnumerator.h
+        BLEDriver.h
         CommThread.cpp
         CommThread.h
+        DeviceSelectionDialog.cpp
+        DeviceSelectionDialog.h
+        Events.cpp
+        Events.h
+        GraphPanel.cpp
+        GraphPanel.h
+        MeasurementEvent.cpp
+        MeasurementEvent.h
+        OsdSettings.cpp
+        OsdSettings.h
+        PowerDelivery.cpp
+        PowerDelivery.h
+        SelectedDevice.cpp
+        SelectedDevice.h
         serialib.cpp
         serialib.h
         SerialPortEnumerator.cpp
         SerialPortEnumerator.h
-        Events.h
-        Events.cpp
-        MeasurementEvent.cpp
-        MeasurementEvent.h
         SettingsDialog.cpp
         SettingsDialog.h
-        BLEDeviceEnumerator.cpp
-        BLEDeviceEnumerator.h
-        DeviceSelectionDialog.cpp
-        DeviceSelectionDialog.h
-        BLEDriver.h
-        SelectedDevice.h
 )
 
 # Add Windows resource file

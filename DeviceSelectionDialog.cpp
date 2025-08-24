@@ -179,9 +179,7 @@ void DeviceSelectionDialog::OnScanTimer(wxTimerEvent &WXUNUSED(event)) {
 void DeviceSelectionDialog::OnSerialItemSelected(wxListEvent &event) {
   long index = event.GetIndex();
   if (index >= 0 && index < static_cast<long>(m_serialPorts.size())) {
-    m_selectedDevice.type = DeviceType::Serial;
-    m_selectedDevice.deviceInfo = m_serialPorts[index];
-    m_selectedDevice.displayName = m_serialPorts[index];
+    m_selectedDevice = new SelectedDevice(DeviceType::Serial, m_serialPorts[index],m_serialPorts[index]);
     m_deviceSelected = true;
     m_okButton->Enable(true);
   }
@@ -191,10 +189,7 @@ void DeviceSelectionDialog::OnBLEItemSelected(wxListEvent &event) {
   long index = event.GetIndex();
   if (index >= 0 && index < static_cast<long>(m_bleDevices.size())) {
     const auto &device = m_bleDevices[index];
-    m_selectedDevice.type = DeviceType::BLE;
-    m_selectedDevice.deviceInfo = device.address;
-    m_selectedDevice.displayName =
-        device.name.IsEmpty() ? device.address : device.name;
+    m_selectedDevice = new SelectedDevice(DeviceType::BLE, device.address,device.name.IsEmpty() ? device.address : device.name);
     m_deviceSelected = true;
     m_okButton->Enable(true);
   }
@@ -219,7 +214,7 @@ void DeviceSelectionDialog::OnOK(wxCommandEvent &WXUNUSED(event)) {
   }
 
   // If BLE device, connect it now
-  if (m_selectedDevice.type == DeviceType::BLE) {
+  if (m_selectedDevice->getType() == DeviceType::BLE) {
     if (!ConnectBLEDevice()) {
       wxMessageBox("Failed to connect to BLE device", "Connection Error",
                    wxOK | wxICON_ERROR, this);
@@ -241,10 +236,10 @@ bool DeviceSelectionDialog::ConnectBLEDevice() {
     auto peripherals = adapter.scan_get_results();
 
     for (auto &peripheral : peripherals) {
-      if (peripheral.address() == m_selectedDevice.deviceInfo.ToStdString()) {
+      if (peripheral.address() == m_selectedDevice->getDeviceInfo().ToStdString()) {
         peripheral.connect();
         if (peripheral.is_connected()) {
-          m_selectedDevice.blePeripheral = peripheral;
+          m_selectedDevice->setBlePeripheral(peripheral);
           return true;
         }
         break;

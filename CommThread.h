@@ -20,7 +20,7 @@ protected:
 private:
   void updateStatus(const wxString &status);
 
-  bool ble_measure_loop(const SelectedDevice &device);
+  bool ble_measure_loop();
 
   bool serial_measure_loop(const std::string &device);
 

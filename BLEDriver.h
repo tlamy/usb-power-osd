@@ -36,14 +36,38 @@ public:
                      const std::string &characteristic_uuid);
 
   // Notifications
-  void enableNotifications(
+  bool enableNotifications(
       const std::string &service_uuid, const std::string &characteristic_uuid,
-      std::function<void(const std::vector<uint8_t> &)> callback);
+      const std::function<void(const std::vector<uint8_t> &)> &callback);
 
 private:
-  SimpleBLE::Adapter adapter_;
-  SimpleBLE::Peripheral connected_device_;
-  bool connected_ = false;
+  SimpleBLE::Adapter adapter;
+  SimpleBLE::Peripheral device;
+  bool connected = false;
 };
+inline bool BLEDriver::enableNotifications(
+    const std::string &serviceUuid, const std::string &characteristicUuid,
+    const std::function<void(const std::vector<uint8_t> &)> &callback) {
+  try {
+    if (!device.is_connected()) {
+      std::cerr << "Device not connected" << std::endl;
+      return false;
+    }
+
+    // Set up notification callback
+    device.notify(serviceUuid, characteristicUuid,
+                  [callback](SimpleBLE::ByteArray data) {
+                    std::vector<uint8_t> dataVec(data.begin(), data.end());
+                    callback(dataVec);
+                  });
+
+    std::cout << "Subscribed to notifications" << std::endl;
+    return true;
+
+  } catch (const std::exception &e) {
+    std::cerr << "Notification subscription error: " << e.what() << std::endl;
+    return false;
+  }
+}
 
 #endif // BLE_DRIVER_H

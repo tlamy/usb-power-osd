@@ -19,7 +19,7 @@ public:
 
   // Get the selected device info
   bool IsDeviceSelected() const { return m_deviceSelected; }
-  SelectedDevice GetSelectedDevice() const { return m_selectedDevice; }
+  SelectedDevice * GetSelectedDevice() const { return m_selectedDevice; }
 
 private:
   enum { ID_REFRESH_BUTTON = 1000, ID_DEVICE_LIST, ID_SCAN_TIMER };
@@ -48,7 +48,7 @@ private:
   std::vector<wxString> m_serialPorts;
   std::vector<BLEDeviceInfo> m_bleDevices;
   BLEDeviceEnumerator m_bleEnumerator;
-  SelectedDevice m_selectedDevice;
+  SelectedDevice * m_selectedDevice = nullptr;
   bool m_deviceSelected;
   int m_scanTimeRemaining;
 

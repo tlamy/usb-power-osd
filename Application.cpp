@@ -171,32 +171,33 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos,
   // Tell the sizer to adjust the layout
   mainSizer->Fit(panel);
 
-  this->serial_thread = new CommThread(this);
-  if (this->serial_thread->Run() != wxTHREAD_NO_ERROR) {
+  this->communicator = new CommThread(this);
+  if (this->communicator->Run() != wxTHREAD_NO_ERROR) {
     wxLogError("Failed to start serial communication thread.");
-    delete this->serial_thread;
-    this->serial_thread = nullptr;
+    delete this->communicator;
+    this->communicator = nullptr;
   }
   // Show device selection dialog after main window is visible
   CallAfter([this]() {
     DeviceSelectionDialog dialog(this);
     if (dialog.ShowModal() == wxID_OK && dialog.IsDeviceSelected()) {
-      SelectedDevice device = dialog.GetSelectedDevice();
+      SelectedDevice *device = dialog.GetSelectedDevice();
 
       // Handle the selected device
-      if (device.type == DeviceType::Serial) {
-        wxString message =
-            wxString::Format("Selected serial port: %s", device.deviceInfo);
+      if (device->getType() == DeviceType::Serial) {
+        wxString message = wxString::Format("Selected serial port: %s",
+                                            device->getDeviceInfo());
         wxMessageBox(message, "Device Selected", wxOK | wxICON_INFORMATION);
         // Initialize your serial communication here
-      } else if (device.type == DeviceType::BLE) {
+      } else if (device->getType() == DeviceType::BLE) {
         wxString message =
-            wxString::Format("Selected BLE device: %s (%s)", device.displayName,
-                             device.deviceInfo);
+            wxString::Format("Selected BLE device: %s (%s)",
+                             device->getDisplayName(), device->getDeviceInfo());
         wxMessageBox(message, "Device Selected", wxOK | wxICON_INFORMATION);
         // Initialize your BLE communication here
-        this->serial_thread->setDevice(device);
+        this->communicator->setDevice(device);
       }
+      this->communicator->setDevice(device);
     } else {
       // User cancelled - you might want to show a message or close the app
       wxMessageBox("No device selected. The application will continue without "
@@ -207,8 +208,8 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos,
 }
 
 void MainFrame::Exit(wxCommandEvent &) {
-  if (this->serial_thread) {
-    this->serial_thread->Delete();
+  if (this->communicator) {
+    this->communicator->Delete();
   }
   Close(true);
 }
@@ -335,22 +336,22 @@ void MainFrame::OnOpenSettings(wxCommandEvent &event) {
 void MainFrame::OnDoubleClick(wxMouseEvent &event) {
   DeviceSelectionDialog dialog(this);
   if (dialog.ShowModal() == wxID_OK && dialog.IsDeviceSelected()) {
-    SelectedDevice device = dialog.GetSelectedDevice();
+    SelectedDevice *device = dialog.GetSelectedDevice();
 
     // Handle the selected device (similar to the code in your constructor)
-    if (device.type == DeviceType::Serial) {
+    if (device->getType() == DeviceType::Serial) {
       wxString message =
-          wxString::Format("Selected serial port: %s", device.deviceInfo);
+          wxString::Format("Selected serial port: %s", device->getDeviceInfo());
       wxMessageBox(message, "Device Selected", wxOK | wxICON_INFORMATION);
       // Initialize your serial communication here
-    } else if (device.type == DeviceType::BLE) {
+    } else if (device->getType() == DeviceType::BLE) {
       wxString message =
-          wxString::Format("Selected BLE device: %s (%s)", device.displayName,
-                           device.deviceInfo);
+          wxString::Format("Selected BLE device: %s (%s)",
+                           device->getDisplayName(), device->getDeviceInfo());
       wxMessageBox(message, "Device Selected", wxOK | wxICON_INFORMATION);
       // Initialize your BLE communication here
-      this->serial_thread->setDevice(device);
     }
+    this->communicator->setDevice(device);
   }
   event.Skip(); // Allow other handlers to process this event if needed
 }

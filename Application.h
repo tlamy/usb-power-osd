@@ -58,7 +58,7 @@ private:
     SETTINGS,
   };
 
-  CommThread *serial_thread;
+  CommThread *communicator;
   wxMenuBar *m_menuBar{};
   bool m_show_status = true;
 };
