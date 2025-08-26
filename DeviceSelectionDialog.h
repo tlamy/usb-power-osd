@@ -7,6 +7,7 @@
 #include "SerialPortEnumerator.h"
 #include "simpleble/Peripheral.h"
 #include "wx/notebook.h"
+#include <atomic>
 #include <vector>
 #include <wx/gauge.h>
 #include <wx/listctrl.h>
@@ -46,11 +47,11 @@ private:
 
   // Data
   std::vector<wxString> m_serialPorts;
-  std::vector<BLEDeviceInfo> m_bleDevices;
+  std::vector<SimpleBLE::Peripheral> m_bleDevices;
   BLEDeviceEnumerator m_bleEnumerator;
   SelectedDevice * m_selectedDevice = nullptr;
   bool m_deviceSelected;
-  int m_scanTimeRemaining;
+  int m_scanCallbacksRemaining;
 
   // Event handlers
   void OnRefreshSerial(wxCommandEvent &event);

@@ -22,7 +22,7 @@ public:
   static bool within(int value, int base_value);
 
   // Convert from millivolts to corresponding PD_VOLTS enum value
-  static PD_VOLTS getEnum(int millivolt);
+  static PD_VOLTS getEnum(float voltage);
 
   // Get the voltage value in volts corresponding to a given PD_VOLTS value
   static int getVoltage(PD_VOLTS volt);

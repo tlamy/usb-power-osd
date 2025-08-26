@@ -1,5 +1,7 @@
 #include "BLEDeviceEnumerator.h"
 
+#include "third-party/SimpleBLE/simpleble/src/backends/common/PeripheralBase.h"
+
 #include <simpleble/SimpleBLE.h>
 
 #include <algorithm>
@@ -41,44 +43,22 @@ public:
           [this](SimpleBLE::Peripheral peripheral) {
             std::cout << "Found BLE device: " << peripheral.identifier() << " ("
                       << peripheral.address() << ")" << std::endl;
-
-            BLEDeviceInfo deviceInfo;
-            deviceInfo.address = wxString(peripheral.address());
-
-            auto identifier = peripheral.identifier();
-            deviceInfo.name = identifier.empty() ? wxT("Unknown Device")
-                                                 : wxString(identifier);
-
-            deviceInfo.rssi = peripheral.rssi();
-            deviceInfo.connectable = peripheral.is_connectable();
-
-            // Get advertised services
-            try {
-              auto services = peripheral.services();
-              for (auto &service : services) {
-                deviceInfo.serviceUuids.push_back(wxString(service.uuid()));
-                std::cout << "  Service: " << service.uuid() << std::endl;
-              }
-            } catch (const std::exception &e) {
-              // Services might not be available during scanning
-              std::cout << "Could not get services for "
-                        << peripheral.identifier() << ": " << e.what()
-                        << std::endl;
+            if (peripheral.identifier().empty()) {
+              return;
             }
-
             // Avoid duplicates
-            auto it =
-                std::find_if(discoveredDevices.begin(), discoveredDevices.end(),
-                             [&deviceInfo](const BLEDeviceInfo &existing) {
-                               return existing.address == deviceInfo.address;
-                             });
+            auto it = std::find_if(
+                discoveredDevices.begin(), discoveredDevices.end(),
+                [&peripheral](SimpleBLE::Peripheral &existing) {
+                  return existing.address() == peripheral.address();
+                });
 
             if (it == discoveredDevices.end()) {
-              discoveredDevices.push_back(deviceInfo);
+              discoveredDevices.push_back(peripheral);
             } else {
-              // Update existing device info (e.g., RSSI might have changed)
-              it->rssi = deviceInfo.rssi;
-              it->connectable = deviceInfo.connectable;
+              // // Update existing device info (e.g., RSSI might have changed)
+              // it->s = peripheral.rssi();
+              // it->connectable = deviceInfo.connectable;
             }
           });
 
@@ -119,7 +99,7 @@ public:
 
   bool IsScanning() const { return scanning; }
 
-  std::vector<BLEDeviceInfo> GetDiscoveredDevices() const {
+  std::vector<SimpleBLE::Peripheral> GetDiscoveredDevices() const {
     return discoveredDevices;
   }
 
@@ -129,7 +109,7 @@ public:
 
 private:
   std::unique_ptr<SimpleBLE::Adapter> adapter;
-  std::vector<BLEDeviceInfo> discoveredDevices;
+  std::vector<SimpleBLE::Peripheral> discoveredDevices;
   std::atomic<bool> scanning; // Make it atomic for thread safety
 };
 
@@ -138,7 +118,7 @@ BLEDeviceEnumerator::BLEDeviceEnumerator() : pImpl(std::make_unique<Impl>()) {}
 
 BLEDeviceEnumerator::~BLEDeviceEnumerator() = default;
 
-std::vector<BLEDeviceInfo>
+std::vector<SimpleBLE::Peripheral>
 BLEDeviceEnumerator::GetBLEDevices(int scanTimeoutMs) {
   BLEDeviceEnumerator enumerator;
   if (enumerator.StartScan(scanTimeoutMs)) {
@@ -146,7 +126,7 @@ BLEDeviceEnumerator::GetBLEDevices(int scanTimeoutMs) {
     std::this_thread::sleep_for(std::chrono::milliseconds(scanTimeoutMs + 100));
     return enumerator.GetDiscoveredDevices();
   }
-  return std::vector<BLEDeviceInfo>();
+  return std::vector<SimpleBLE::Peripheral>();
 }
 
 bool BLEDeviceEnumerator::StartScan(int timeoutMs) {
@@ -157,7 +137,7 @@ void BLEDeviceEnumerator::StopScan() { pImpl->StopScan(); }
 
 bool BLEDeviceEnumerator::IsScanning() const { return pImpl->IsScanning(); }
 
-std::vector<BLEDeviceInfo> BLEDeviceEnumerator::GetDiscoveredDevices() const {
+std::vector<SimpleBLE::Peripheral> BLEDeviceEnumerator::GetDiscoveredDevices() {
   return pImpl->GetDiscoveredDevices();
 }
 
@@ -165,28 +145,15 @@ void BLEDeviceEnumerator::ClearDiscoveredDevices() {
   pImpl->ClearDiscoveredDevices();
 }
 
-std::vector<BLEDeviceInfo>
-BLEDeviceEnumerator::FilterDevicesByName(const wxString &namePattern) const {
-  auto devices = GetDiscoveredDevices();
-  std::vector<BLEDeviceInfo> filtered;
+std::vector<SimpleBLE::Peripheral>
+BLEDeviceEnumerator::FilterDevicesByService(wxString &serviceUuid) {
+  std::vector<SimpleBLE::Peripheral> filtered;
 
-  for (const auto &device : devices) {
-    if (device.name.Contains(namePattern)) {
-      filtered.push_back(device);
-    }
-  }
-
-  return filtered;
-}
-
-std::vector<BLEDeviceInfo>
-BLEDeviceEnumerator::FilterDevicesByService(const wxString &serviceUuid) const {
-  auto devices = GetDiscoveredDevices();
-  std::vector<BLEDeviceInfo> filtered;
-
-  for (const auto &device : devices) {
-    for (const auto &uuid : device.serviceUuids) {
-      if (uuid.Upper() == serviceUuid.Upper()) {
+  for (auto &device : GetDiscoveredDevices()) {
+    if (!device.is_connected())
+      device.connect();
+    for (auto &service : device.services()) {
+      if (service.uuid() == serviceUuid.Upper()) {
         filtered.push_back(device);
         break;
       }

@@ -195,7 +195,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos,
                              device->getDisplayName(), device->getDeviceInfo());
         wxMessageBox(message, "Device Selected", wxOK | wxICON_INFORMATION);
         // Initialize your BLE communication here
-        this->communicator->setDevice(device);
+        // this->communicator->setDevice(device);
       }
       this->communicator->setDevice(device);
     } else {
@@ -203,6 +203,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos,
       wxMessageBox("No device selected. The application will continue without "
                    "a connection.",
                    "No Device", wxOK | wxICON_INFORMATION);
+      this->communicator->setDevice(nullptr);
     }
   });
 }
@@ -271,14 +272,20 @@ void MainFrame::OnDataUpdate(wxThreadEvent &event) {
     this->m_status_text->GetContainingSizer()->Layout();
     this->Refresh();
   }
-  this->m_watts->SetLabel(
-      wxString::Format("%0.3fW", theEvent->GetMilliVolts() *
-                                     theEvent->GetMilliAmps() / 1000000.0));
-  auto voltage = PowerDelivery::getEnum(theEvent->GetMilliVolts());
+  if (theEvent->GetPower() == 0.0) {
+    this->m_watts->SetLabel(
+        wxString::Format("%0.3fW", theEvent->GetPower())
+        );
+  } else {
+    this->m_watts->SetLabel(
+        wxString::Format("%0.3fW", theEvent->GetMilliVolts() *
+                                       theEvent->GetMilliAmps() / 1000000.0));
+  }
+  auto pd_volts = PowerDelivery::getEnum(theEvent->GetVoltage());
   wxString voltage_str =
-      wxString::Format("%0dV", PowerDelivery::getVoltage(voltage));
+      wxString::Format("%0dV", PowerDelivery::getVoltage(pd_volts));
   wxString amp_str =
-      wxString::Format("%0.3fA", theEvent->GetMilliAmps() / 1000.0);
+      wxString::Format("%0.3fA", theEvent->GetCurrent());
   this->m_voltage->SetLabel(voltage_str);
   this->m_current->SetLabel(amp_str);
   int minCurrent, maxCurrent;
@@ -288,7 +295,7 @@ void MainFrame::OnDataUpdate(wxThreadEvent &event) {
   this->m_current_minmax->SetLabel(min_str);
   if (theEvent->GetMilliVolts() > 500 &&
       theEvent->GetMilliAmps() >= settings.min_current) {
-    this->m_graph_panel->add(theEvent->GetMilliAmps(), voltage);
+    this->m_graph_panel->add(theEvent->GetMilliAmps(), pd_volts);
   }
 }
 

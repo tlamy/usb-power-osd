@@ -1,23 +1,11 @@
 #ifndef BLEDEVICEENUMERATOR_H
 #define BLEDEVICEENUMERATOR_H
 
+#include "simpleble/Peripheral.h"
+
 #include <memory>
 #include <vector>
 #include <wx/wx.h>
-
-struct BLEDeviceInfo {
-  wxString name;                      // Device name (if available)
-  wxString address;                   // MAC address
-  int rssi;                           // Signal strength
-  bool connectable;                   // Whether device is connectable
-  std::vector<wxString> serviceUuids; // Advertised service UUIDs
-
-  BLEDeviceInfo(const wxString &deviceName = wxEmptyString,
-                const wxString &deviceAddress = wxEmptyString,
-                int signalStrength = -100, bool isConnectable = false)
-      : name(deviceName), address(deviceAddress), rssi(signalStrength),
-        connectable(isConnectable) {}
-};
 
 class BLEDeviceEnumerator {
 public:
@@ -27,7 +15,7 @@ public:
 
   // Static method to get available BLE devices (similar to
   // SerialPortEnumerator::GetPortNames)
-  static std::vector<BLEDeviceInfo> GetBLEDevices(int scanTimeoutMs = 5000);
+  static std::vector<SimpleBLE::Peripheral> GetBLEDevices(int scanTimeoutMs = 5000);
 
   // Instance methods for more control
   bool StartScan(int timeoutMs = 5000);
@@ -36,16 +24,12 @@ public:
 
   bool IsScanning() const;
 
-  std::vector<BLEDeviceInfo> GetDiscoveredDevices() const;
+  std::vector<SimpleBLE::Peripheral> GetDiscoveredDevices();
 
   void ClearDiscoveredDevices();
 
-  // Filter devices by name pattern or service UUID
-  std::vector<BLEDeviceInfo>
-  FilterDevicesByName(const wxString &namePattern) const;
-
-  std::vector<BLEDeviceInfo>
-  FilterDevicesByService(const wxString &serviceUuid) const;
+  std::vector<SimpleBLE::Peripheral>
+  FilterDevicesByService(wxString &serviceUuid);
 
   // Check if BLE adapter is available
   static bool IsBluetoothAvailable();

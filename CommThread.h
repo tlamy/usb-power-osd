@@ -5,6 +5,7 @@
 #include <wx/thread.h>
 
 #include "DeviceSelectionDialog.h"
+#include "MeasurementEvent.h"
 #include "SelectedDevice.h"
 
 class CommThread final : public wxThread {
@@ -19,8 +20,11 @@ protected:
 
 private:
   void updateStatus(const wxString &status);
+  void parseUSBMeterData(const SimpleBLE::ByteArray &data);
+  void handleReceivedData(const SimpleBLE::ByteArray &data);
+  MeasurementEvent parseJson(std::string json);
 
-  bool ble_measure_loop();
+  bool ble_measure_loop(SimpleBLE::Peripheral peripheral);
 
   bool serial_measure_loop(const std::string &device);
 
@@ -28,6 +32,6 @@ private:
 
   enum { SEARCH, MEASURE, WAIT } p_mode = SEARCH;
 
-  SelectedDevice *device = nullptr;
+  std::atomic<SelectedDevice*> device{nullptr};
 };
 #endif // SERIALTHREAD_H

@@ -18,11 +18,11 @@ public:
     STYLE_LINE = true,
   } graph_style_t;
 
-  void add(int current, PowerDelivery::PD_VOLTS voltage);
+  void add(float current, PowerDelivery::PD_VOLTS voltage);
 
   void SetGraphStyle(graph_style_t style);
 
-  void GetMinMaxCurrent(int *min, int *max) const;
+  void GetMinMaxCurrent(float *min, float *max) const;
 
 private:
   void OnPaint(wxPaintEvent &event);
@@ -32,8 +32,8 @@ private:
   std::deque<PowerDelivery::PD_VOLTS> m_voltages;
   int m_maxBarValue = 1;
   int m_size;
-  int m_current_min = 0;
-  int m_current_max = 0;
+  float m_current_min = 0;
+  float m_current_max = 0;
 
   static int maxDequeueItem(const std::deque<int> &deque);
 };

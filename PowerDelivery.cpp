@@ -11,7 +11,8 @@ bool PowerDelivery::within(int value, int base_value) {
 }
 
 // Get the PD_VOLTS value for a given millivolt
-PowerDelivery::PD_VOLTS PowerDelivery::getEnum(int millivolt) {
+PowerDelivery::PD_VOLTS PowerDelivery::getEnum(float voltage) {
+  auto millivolt = static_cast<int>(voltage * 1000);
   PD_VOLTS voltEnum = PD_NONE;
   if (within(millivolt, 5000)) {
     voltEnum = PD_5V;

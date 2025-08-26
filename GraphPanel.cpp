@@ -69,7 +69,7 @@ void GraphPanel::SetGraphStyle(const graph_style_t style) {
   }
 }
 
-void GraphPanel::GetMinMaxCurrent(int *min, int *max) const {
+void GraphPanel::GetMinMaxCurrent(float *min, float *max) const {
   *min = this->m_current_min;
   *max = this->m_current_max;
 }

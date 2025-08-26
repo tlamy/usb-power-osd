@@ -117,6 +117,8 @@ set(SRCS
         SerialPortEnumerator.h
         SettingsDialog.cpp
         SettingsDialog.h
+        JsonParser.h
+        JsonParser.cpp
 )
 
 # Add Windows resource file

@@ -3,13 +3,12 @@
 #include <wx/notebook.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
-
 #include "simpleble/Adapter.h"
 
 DeviceSelectionDialog::DeviceSelectionDialog(wxWindow *parent)
     : wxDialog(parent, wxID_ANY, "Select Communication Device",
                wxDefaultPosition, wxSize(500, 400)),
-      m_deviceSelected(false), m_scanTimeRemaining(0) {
+      m_deviceSelected(false), m_scanCallbacksRemaining(0) {
   // Initialize timer after construction
   m_scanTimer.SetOwner(this, ID_SCAN_TIMER);
 
@@ -80,7 +79,7 @@ void DeviceSelectionDialog::CreateControls() {
     m_bleList =
         new wxListCtrl(m_blePanel, ID_DEVICE_LIST + 1, wxDefaultPosition,
                        wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
-    m_bleList->AppendColumn("Name", wxLIST_FORMAT_LEFT, 120);
+    m_bleList->AppendColumn("Name", wxLIST_FORMAT_LEFT, 200);
     m_bleList->AppendColumn("Address", wxLIST_FORMAT_LEFT, 120);
     m_bleList->AppendColumn("RSSI", wxLIST_FORMAT_LEFT, 60);
     bleSizer->Add(m_bleList, 1, wxEXPAND | wxALL, 5);
@@ -142,9 +141,9 @@ void DeviceSelectionDialog::OnScanBLE(wxCommandEvent &WXUNUSED(event)) {
 }
 
 void DeviceSelectionDialog::OnScanTimer(wxTimerEvent &WXUNUSED(event)) {
-  m_scanTimeRemaining--;
+  m_scanCallbacksRemaining--;
 
-  if (m_scanTimeRemaining <= 0) {
+  if (m_scanCallbacksRemaining <= 0) {
     m_scanTimer.Stop();
     if (m_scanProgress) {
       m_scanProgress->SetValue(100);
@@ -161,13 +160,14 @@ void DeviceSelectionDialog::OnScanTimer(wxTimerEvent &WXUNUSED(event)) {
     m_bleDevices = m_bleEnumerator.GetDiscoveredDevices();
     UpdateBLEList();
   } else {
-    int progress = (50 - m_scanTimeRemaining) * 2; // Convert 5s to 100%
+    int progress = (50 - m_scanCallbacksRemaining) * 2; // Convert 5s to 100%
     if (m_scanProgress) {
       m_scanProgress->SetValue(progress);
     }
     if (m_scanStatus) {
-      m_scanStatus->SetLabel(wxString::Format(
-          "Scanning... %d seconds remaining", m_scanTimeRemaining));
+      m_scanStatus->SetLabel(
+          wxString::Format("Scanning... %d seconds remaining",
+                           static_cast<int>(std::ceil(m_scanCallbacksRemaining / 10))));
     }
 
     // Update list with current discoveries
@@ -179,7 +179,8 @@ void DeviceSelectionDialog::OnScanTimer(wxTimerEvent &WXUNUSED(event)) {
 void DeviceSelectionDialog::OnSerialItemSelected(wxListEvent &event) {
   long index = event.GetIndex();
   if (index >= 0 && index < static_cast<long>(m_serialPorts.size())) {
-    m_selectedDevice = new SelectedDevice(DeviceType::Serial, m_serialPorts[index],m_serialPorts[index]);
+    m_selectedDevice = new SelectedDevice(
+        DeviceType::Serial, m_serialPorts[index], m_serialPorts[index]);
     m_deviceSelected = true;
     m_okButton->Enable(true);
   }
@@ -188,8 +189,11 @@ void DeviceSelectionDialog::OnSerialItemSelected(wxListEvent &event) {
 void DeviceSelectionDialog::OnBLEItemSelected(wxListEvent &event) {
   long index = event.GetIndex();
   if (index >= 0 && index < static_cast<long>(m_bleDevices.size())) {
-    const auto &device = m_bleDevices[index];
-    m_selectedDevice = new SelectedDevice(DeviceType::BLE, device.address,device.name.IsEmpty() ? device.address : device.name);
+    auto &device = m_bleDevices[index];
+    m_selectedDevice = new SelectedDevice(
+        DeviceType::BLE, wxString(device.address()),
+        wxString(device.identifier().empty() ? device.address()
+                                             : device.identifier()));
     m_deviceSelected = true;
     m_okButton->Enable(true);
   }
@@ -236,9 +240,12 @@ bool DeviceSelectionDialog::ConnectBLEDevice() {
     auto peripherals = adapter.scan_get_results();
 
     for (auto &peripheral : peripherals) {
-      if (peripheral.address() == m_selectedDevice->getDeviceInfo().ToStdString()) {
+      if (peripheral.address() ==
+          m_selectedDevice->getDeviceInfo().ToStdString()) {
+        std::cout << "Connecting to BLE device: " << peripheral.address() << std::endl;
         peripheral.connect();
         if (peripheral.is_connected()) {
+        std::cout << "Successfully connected." << std::endl;
           m_selectedDevice->setBlePeripheral(peripheral);
           return true;
         }
@@ -295,7 +302,7 @@ void DeviceSelectionDialog::StartBLEScan() {
   m_bleDevices.clear();
   m_bleEnumerator.ClearDiscoveredDevices();
 
-  m_scanTimeRemaining = 50; // 5 seconds in 100ms intervals
+  m_scanCallbacksRemaining = 50; // 5 seconds in 100ms intervals
   m_scanProgress->SetValue(0);
   m_scanStatus->SetLabel("Starting scan...");
   m_scanBleButton->SetLabel("Stop Scan");
@@ -318,11 +325,12 @@ void DeviceSelectionDialog::UpdateBLEList() {
 
   // Add discovered devices
   for (size_t i = 0; i < m_bleDevices.size(); ++i) {
-    const auto &device = m_bleDevices[i];
-    long itemIndex = m_bleList->InsertItem(
-        i, device.name.IsEmpty() ? "Unknown Device" : device.name);
-    m_bleList->SetItem(itemIndex, 1, device.address);
-    m_bleList->SetItem(itemIndex, 2, wxString::Format("%d dBm", device.rssi));
+    auto &device = m_bleDevices[i];
+    long itemIndex = m_bleList->InsertItem(i, device.identifier().empty()
+                                                  ? "Unknown Device"
+                                                  : device.identifier());
+    m_bleList->SetItem(itemIndex, 1, device.address());
+    m_bleList->SetItem(itemIndex, 2, wxString::Format("%d dBm", device.rssi()));
   }
 
   if (m_bleDevices.empty() && !m_bleEnumerator.IsScanning()) {
