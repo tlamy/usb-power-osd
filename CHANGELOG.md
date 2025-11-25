@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/tlamy/usb-power-osd/compare/v1.0.5...v1.0.6) (2025-11-25)
+
+
+### Bug Fixes
+
+* upgraded semantic-release to remove/work aroung js glob vulnerability ([eb418e2](https://github.com/tlamy/usb-power-osd/commit/eb418e24f27e84a8a0ac4dabb0156baccb09353b))
+
 ## [1.0.5](https://github.com/tlamy/usb-power-osd/compare/v1.0.4...v1.0.5) (2025-06-08)
 
 
