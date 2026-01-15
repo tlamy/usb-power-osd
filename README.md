@@ -1,6 +1,9 @@
 # USB Power On Screen Display
 On Screen Display for my USB-C Power Meter (compatible to PLD's)
 
+**This project is now archived and no longer maintained.**
+The successor (using Qt instead of WxWidgets) is at (https://github.com/MacWake/usb-power-osd-qt)
+
 ## Building from source
 ### Linux
 ```shell
